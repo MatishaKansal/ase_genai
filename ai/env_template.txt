@@ -1,0 +1,22 @@
+# Copy this file to .env and fill in your actual values
+
+# Google Cloud Configuration
+GCP_PROJECT_ID=your-actual-gcp-project-id
+GCP_LOCATION=us-central1
+DOCAI_PROCESSOR_ID=your-actual-docai-processor-id
+
+# Vertex AI Configuration
+EMBEDDING_MODEL=textembedding-gecko@latest
+
+# Gemini API Configuration
+GEMINI_API_KEY=your-actual-gemini-api-key
+
+# Application Settings
+VECTOR_STORE_PATH=vector_store/faiss_index
+MAX_FILE_SIZE_MB=10
+CHUNK_SIZE=500
+ANOMALY_THRESHOLD=0.3
+
+# Optional: Override default settings
+# LOG_LEVEL=INFO
+# BATCH_SIZE=5
