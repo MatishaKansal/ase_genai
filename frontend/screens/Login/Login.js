@@ -3,113 +3,104 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { LinearGradient } from "expo-linear-gradient";
-import styles from "./LoginStyles";
 import { useWindowDimensions } from "react-native";
+import styles from "./LoginStyles";
 import Header from "../../components/Header";
-import Signup from "../SignUp/SignUp";
 
-
-const baseUrl = "http://192.168.X.X:5000";
+const baseUrl = "http://localhost:5000"; // change to your backend IP
 
 export default function Login() {
-
   const { width } = useWindowDimensions();
+  const navigation = useNavigation();
 
-    const [formData, setFormData] = useState({
-        email: "",
-        password: "",
-    });
-    const [message, setMessage] = useState("");
-    
-    const navigation = useNavigation();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [message, setMessage] = useState("");
 
+  // Update form values
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-    const handleChange = (e) => {
-        setFormData(prev => ({
-            ...prev,
-            [e.target.name]: e.target.value,
-        }));
-    };
+  // Handle login
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post(`${baseUrl}/api/auth/login`, formData);
+      console.log("Full response:", response.data);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post(`${baseUrl}/api/auth/login`, formData);
-            console.log("Full response:", response)
-            const token = response.data.token;
-            if (token) {
-                localStorage.setItem("token", token);
-                console.log("token stored in localStorage:", token)
-                alert("Login successful")
-                navigate("/");
-
-            } else {
-                alert("Login failed: Token not received")
-            }
-            localStorage.setItem("user", JSON.stringify(response.data.user));
-            setMessage('');
-            setTimeout(() => {
-                navigate("/");
-            }, 1000);            
-
-        } catch (error) {
-            console.error(error.response?.data || "Login failed");
-            alert("Login failed");
+      const token = response.data?.token;
+      if (token) {
+        // store token + user in AsyncStorage
+        await AsyncStorage.setItem("token", token);
+        if (response.data.user) {
+          await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
         }
-    };
 
-    const handleForgotPassword = async () => {
-        console.log("Hello");
-        try {
-            alert("Password change settings");
-
-        } catch (error) {
-            console.error(error.response?.data || "Failed to send password reset link");
-            alert("Failed to send password reset link");
-        }
-    };
+        Alert.alert("Success", "Login successful!");
+        setMessage("");
+        navigation.navigate("Home"); // 👈 change to your main screen name
+      } else {
+        Alert.alert("Error", "Login failed: Token not received");
+      }
+    } catch (error) {
+      console.error(error.response?.data || "Login failed");
+      setMessage("Login failed. Please check your credentials.");
+      Alert.alert("Error", "Login failed. Please try again.");
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
-    <Header />
-    <View style={[styles.container, { flexDirection: width > 768 ? "row" : "column" }]} >
-      <View style={styles.box}>
-        <Text style={styles.startText}>Welcome back !!</Text>
-        <Text style={styles.createText}>Login</Text>
+      <Header />
+      <View
+        style={[
+          styles.container,
+          { flexDirection: width > 768 ? "row" : "column" },
+        ]}
+      >
+        <View style={styles.box}>
+          <Text style={styles.startText}>Welcome back !!</Text>
+          <Text style={styles.createText}>Login</Text>
 
-        <TextInput
-          placeholder="Email Address"
-          style={styles.input}
-          value={formData.email}
-          onChangeText={(text) => handleChange("email", text)}
-        />
+          <TextInput
+            placeholder="Email Address"
+            style={styles.input}
+            value={formData.email}
+            onChangeText={(text) => handleChange("email", text)}
+          />
 
-        <TextInput
-          placeholder="Password"
-          secureTextEntry
-          style={styles.input}
-          value={formData.password}
-          onChangeText={(text) => handleChange("password", text)}
-        />
+          <TextInput
+            placeholder="Password"
+            secureTextEntry
+            style={styles.input}
+            value={formData.password}
+            onChangeText={(text) => handleChange("password", text)}
+          />
 
-        {message ? <Text style={styles.error}>{message}</Text> : null}
+          {message ? <Text style={styles.error}>{message}</Text> : null}
 
-        <TouchableOpacity style={styles.signUpButton} onPress={handleSubmit}>
-          <Text style={styles.signUpText}>Login</Text>
-        </TouchableOpacity>
-                <Text style={styles.welcome}>New to the app?</Text>
-        {/* <Text style={styles.subText}>
-          Sign in to the world where knowledge blooms !!
-        </Text> */}
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate("SignUp")}
-        >
-          <Text style={styles.loginText}>Sign Up</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.signUpButton}
+            onPress={() => navigation.navigate("ChatTabs")} 
+          // onPress={handleSubmit}
+          >
+            <Text style={styles.signUpText}>Login</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.welcome}>New to the app?</Text>
+
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("SignUp")}
+          >
+            <Text style={styles.loginText}>Sign Up</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
     </View>
   );
 }
