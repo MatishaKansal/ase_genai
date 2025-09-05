@@ -7,6 +7,7 @@ const LoginStyles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
     justifyContent: "center", 
     alignItems: "center", 
+    
   },
   welcome: {
     fontSize: 16,
@@ -58,6 +59,7 @@ const LoginStyles = StyleSheet.create({
     marginBottom: 50,
     maxWidth: 400,
     alignSelf: 'center',
+
   },
   startText: {
     fontSize: 18,
@@ -86,7 +88,7 @@ const LoginStyles = StyleSheet.create({
     marginBottom: 10,
   },
   signUpButton: {
-    backgroundColor: "#4DBF99",
+    backgroundColor: "#f59e0b",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
