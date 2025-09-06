@@ -16,10 +16,25 @@ import Header from "../../components/Header";
 export default function Chat() {
   const [inputValue, setInputValue] = useState("");
   const [isBottom, setIsBottom] = useState(false); // track position
+  const [inputHeight, setInputHeight] = useState(40); // ~1 line
+  const [scrollEnabled, setScrollEnabled] = useState(false);
+  const [prevLen, setPrevLen] = useState(0);
+
+  const ONE_LINE = 40;      // tune to your font/padding
+  const MAX_HEIGHT = ONE_LINE * 4;
+
 
   const handleClear = () => setInputValue("");
   const handleAdd = () => alert("Add button clicked!");
   const handleMic = () => alert("Mic pressed!");
+
+  const handleSizeChange = (e) => {
+    const h = e.nativeEvent.contentSize.height || ONE_LINE;
+    const clamped = Math.max(ONE_LINE, Math.min(h, MAX_HEIGHT));
+    setInputHeight(clamped);
+    setScrollEnabled(h > MAX_HEIGHT); // show scrollbar only after 4 lines
+  };
+
 
   const handleSend = () => {
     if (!inputValue.trim()) return; // empty avoid
@@ -69,18 +84,23 @@ export default function Chat() {
 
                 {/* Input box */}
                 <TextInput
-                  style={styles.textarea}
+                  style={[styles.textarea, { height: inputHeight }]}
                   value={inputValue}
-                  onChangeText={setInputValue}
+                  onChangeText={(text) => {
+                    // if text length decreased, briefly disable scrolling so
+                    // contentSize recalculates and height can shrink
+                    if (text.length < prevLen && scrollEnabled) setScrollEnabled(false);
+                    setPrevLen(text.length);
+                    setInputValue(text);
+                    if (text.length === 0) setInputHeight(ONE_LINE); // reset when empty
+                  }}
                   placeholder="Type a message..."
                   placeholderTextColor="black"
+                  multiline
+                  textAlignVertical="top"
+                  onContentSizeChange={handleSizeChange}
+                  scrollEnabled={scrollEnabled}
                   returnKeyType="send"
-                  onSubmitEditing={() => {
-                    if (inputValue.trim()) {
-                      handleSend();
-                      setInputValue("");
-                    }
-                  }}
                 />
 
                 {/* Mic / Send button */}

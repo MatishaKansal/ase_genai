@@ -16,7 +16,7 @@ export default function SignUp() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    name: "",
+    userName: "",
   });
 
   const [message, setMessage] = useState("");
@@ -32,20 +32,20 @@ export default function SignUp() {
   // Handle signup
   const handleSubmit = async () => {
     try {
-      const res = await axios.post(`${baseUrl}/api/auth/register`, {
+      const res = await axios.post(`${baseUrl}/auth/signup`, {
         email: formData.email,
         password: formData.password,
-        name: formData.name,
+        userName: formData.userName,
       });
 
       const token = res.data?.token;
       if (token) {
         // Save token in AsyncStorage
         await AsyncStorage.setItem("token", token);
-
+        await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
         Alert.alert("Success", "Signed up successfully!");
         setMessage("");
-        navigation.navigate("Login"); // 👈 after signup go to login screen
+        navigation.navigate("Home"); // 👈 after signup go to login screen
       }
     } catch (error) {
       console.log(error.response?.data || error.message);
@@ -77,8 +77,8 @@ export default function SignUp() {
           <TextInput
             placeholder="Username"
             style={styles.input}
-            value={formData.name}
-            onChangeText={(text) => handleChange("name", text)}
+            value={formData.userName}
+            onChangeText={(text) => handleChange("userName", text)}
           />
 
           <TextInput

@@ -8,8 +8,8 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
     // borderWidth: 2,
     // borderColor: "red",
-    height: height,  
-    width: width,     
+    height: height,
+    width: width,
   },
   content: {
     flex: 1,                 // baki ka space header ke neeche le lega
@@ -48,21 +48,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "95%", 
-    maxWidth: 1000, 
+    width: "95%",
+    maxWidth: 1000,
     padding: 5,
     borderRadius: 10,
 
   },
   textarea: {
     flex: 1,
-    height: 35,
+    minHeight: 40,          // 1-line starting height
+    // no fixed height here; we control via inline {height: inputHeight}
     backgroundColor: "#d1d5db",
     color: "black",
-    paddingLeft: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 5,
     fontSize: 16,
+    lineHeight: 20,         // helps keep line calc stable
+    textAlignVertical: "top",
   },
+
   switch: {
     marginLeft: 5,
     justifyContent: "center",

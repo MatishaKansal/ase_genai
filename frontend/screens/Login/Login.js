@@ -30,7 +30,7 @@ export default function Login() {
   // Handle login
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(`${baseUrl}/api/auth/login`, formData);
+      const response = await axios.post(`${baseUrl}/auth/login`, formData);
       console.log("Full response:", response.data);
 
       const token = response.data?.token;

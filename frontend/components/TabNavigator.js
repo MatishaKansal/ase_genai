@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import Chat from "../screens/Chat/Chat";
-import Profile from "../screens/Home/Home";  
+import Profile from "../screens/Profile/Profile";  
 import Camera from "../screens/CameraScreen/CameraScreen";         
 
 const Tab = createBottomTabNavigator();
