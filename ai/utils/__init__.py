@@ -1,5 +1,5 @@
 """
-Utility functions for AI document processing
+Simplified utility functions for AI document processing
 """
 
 from .ocr_utils import extract_text_from_document
