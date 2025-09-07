@@ -26,9 +26,9 @@ const login = async (req, resp) => {
             message: 'Logged in Successfully',
             token: generateToken(user._id),
             user: {
-                _id: user._id,
                 email: user.email,
-                name: user.name
+                userName: user.userName,
+                profilePic: user.profilePic
             }
         })
     } catch (err) {
@@ -37,9 +37,9 @@ const login = async (req, resp) => {
 };
 
 const signup = async (req, resp) => {
-    const { email, password, name } = req.body;
+    const { email, password, userName } = req.body;
 
-    if (!email || !password || !name) {
+    if (!email || !password || !userName) {
         return resp.status(400).json({ message: 'All fields are necessary' });
     }
     try {
@@ -48,13 +48,20 @@ const signup = async (req, resp) => {
             return resp.status(400).json({ message: "Email already exists, please use a diffrent one" });
         }
 
-        const user = await User.create({ email, password });
+        const idx = Math.floor(Math.random() * 100) + 1; // generate a num between 1-100
+        const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
+
+        const user = await User.create({ email, userName, password, profilePic: randomAvatar });
 
         if (user) {
             resp.status(201).json({
-                _id: user._id,
-                email: user.email,
+                user: {
+                    email: user.email,
+                    userName: user.userName,
+                    profilePic: user.profilePic
+                },
                 token: generateToken(user._id),
+                message: 'User created successfully'
             });
         } else {
             resp.status(400).json({ message: 'Invalid user data' });
