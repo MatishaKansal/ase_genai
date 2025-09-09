@@ -45,7 +45,7 @@ export default function SignUp() {
         await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
         Alert.alert("Success", "Signed up successfully!");
         setMessage("");
-        navigation.navigate("Home"); // 👈 after signup go to login screen
+        navigation.navigate("ChatTabs"); 
       }
     } catch (error) {
       console.log(error.response?.data || error.message);

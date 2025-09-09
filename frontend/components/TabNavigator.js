@@ -11,10 +11,7 @@ const Tab = createBottomTabNavigator();
 // Custom floating button
 function CameraButton({ children, onPress }) {
   return (
-    <TouchableOpacity
-      style={styles.cameraButton}
-      onPress={onPress}
-    >
+    <TouchableOpacity style={styles.cameraButton} onPress={onPress}>
       <View style={styles.innerCircle}>{children}</View>
     </TouchableOpacity>
   );
@@ -23,26 +20,29 @@ function CameraButton({ children, onPress }) {
 export default function TabNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Profile"
+      initialRouteName="Chat"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: { backgroundColor: "white", height: 60 },
+        tabBarStyle: { backgroundColor: "white", height: 70, paddingTop: 10 },
       }}
     >
       <Tab.Screen
         name="Profile"
         component={Profile}
         options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person-circle-outline" size={40} color={color} />
+          tabBarIcon: () => (
+            <Ionicons name="person-circle-outline" size={40} color="black" />
           ),
         }}
       />
+
       <Tab.Screen
         name="Camera"
         component={Camera}
         options={{
+          // 👇 Important: Camera screen fresh mount/unmount for direct load
+          unmountOnBlur: true,
           tabBarButton: (props) => (
             <CameraButton {...props}>
               <Ionicons name="camera" size={40} color="black" />
@@ -50,15 +50,16 @@ export default function TabNavigator() {
           ),
         }}
       />
+
       <Tab.Screen
         name="Chat"
         component={Chat}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: () => (
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={40}
-              color={color}
+              color="black"
             />
           ),
         }}
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     width: 65,
     height: 65,
     borderRadius: 35,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#d1d5db",
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,

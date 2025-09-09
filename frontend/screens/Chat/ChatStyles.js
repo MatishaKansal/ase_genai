@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-end",
     paddingRight: 10,
+    // borderRadius: 20,
   },
   topbarButton: {
     height: 50,
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "orange",
-    borderRadius: 8,
+    borderRadius: 30,
     marginRight: 10,
   },
   search: {
@@ -56,7 +57,8 @@ const styles = StyleSheet.create({
   },
   textarea: {
     flex: 1,
-    minHeight: 40,          // 1-line starting height
+    // minHeight: 20,  
+    // 1-line starting height
     // no fixed height here; we control via inline {height: inputHeight}
     backgroundColor: "#d1d5db",
     color: "black",
@@ -64,7 +66,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 5,
     fontSize: 16,
-    lineHeight: 20,         // helps keep line calc stable
+    lineHeight: 25,         // helps keep line calc stable
     textAlignVertical: "top",
   },
 

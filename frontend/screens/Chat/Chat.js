@@ -20,7 +20,7 @@ export default function Chat() {
   const [scrollEnabled, setScrollEnabled] = useState(false);
   const [prevLen, setPrevLen] = useState(0);
 
-  const ONE_LINE = 40;      // tune to your font/padding
+  const ONE_LINE = 20;      // tune to your font/padding
   const MAX_HEIGHT = ONE_LINE * 4;
 
 
@@ -56,7 +56,7 @@ export default function Chat() {
         {/* Topbar */}
         <View style={styles.topbar}>
           <TouchableOpacity style={styles.topbarButton} onPress={handleClear}>
-            <Text style={{ color: "black", fontWeight: "500" }}>Clear Chat</Text>
+            <Text style={{ color: "black", fontWeight: "500", fontSize: "16" }}>Clear Chat</Text>
           </TouchableOpacity>
         </View>
 
@@ -84,25 +84,36 @@ export default function Chat() {
 
                 {/* Input box */}
                 <TextInput
-                  style={[styles.textarea, { height: inputHeight }]}
+                  style={[
+                    styles.textarea,
+                    {
+                      minHeight: ONE_LINE,
+                      maxHeight: MAX_HEIGHT,
+                      // ❌ height: inputHeight  <-- isko hata do
+                      lineHeight: 20,
+                      paddingVertical: 6,
+                    },
+                  ]}
                   value={inputValue}
-                  onChangeText={(text) => {
-                    // if text length decreased, briefly disable scrolling so
-                    // contentSize recalculates and height can shrink
-                    if (text.length < prevLen && scrollEnabled) setScrollEnabled(false);
-                    setPrevLen(text.length);
-                    setInputValue(text);
-                    if (text.length === 0) setInputHeight(ONE_LINE); // reset when empty
-                  }}
+                  onChangeText={(text) => setInputValue(text)}
                   placeholder="Type a message..."
                   placeholderTextColor="black"
                   multiline
                   textAlignVertical="top"
-                  onContentSizeChange={handleSizeChange}
+                  onContentSizeChange={(e) => {
+                    const h = e.nativeEvent.contentSize.height;
+
+                    // bas scroll toggle karo
+                    if (h > MAX_HEIGHT) {
+                      setScrollEnabled(true);
+                    } else {
+                      setScrollEnabled(false);
+                    }
+                  }}
                   scrollEnabled={scrollEnabled}
                   returnKeyType="send"
-                />
-
+                  blurOnSubmit={false}
+                  />
                 {/* Mic / Send button */}
                 <TouchableOpacity
                   style={styles.switch}

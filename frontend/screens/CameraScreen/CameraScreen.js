@@ -1,38 +1,126 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import React, { useState, useRef, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Image, AppState } from "react-native";
 import { Camera } from "expo-camera";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function CameraScreen() {
   const [hasPermission, setHasPermission] = useState(null);
-  const [cameraRef, setCameraRef] = useState(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [photoUri, setPhotoUri] = useState(null);
+  const cameraRef = useRef(null);
+  const videoRef = useRef(null);
+  const mediaStreamRef = useRef(null);
+  const appState = useRef(AppState.currentState);
 
+  // ✅ App background par camera off
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (appState.current === "active" && nextAppState.match(/inactive|background/)) {
+        if (Platform.OS === "web" && mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
+        }
+        if (cameraRef.current) {
+          cameraRef.current.pausePreview?.();
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => subscription.remove();
   }, []);
 
+  // ✅ Screen switch hone par bhi camera off
+  useFocusEffect(
+    React.useCallback(() => {
+      const activateCamera = async () => {
+        if (Platform.OS === "web") {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            mediaStreamRef.current = stream;
+            if (videoRef.current) videoRef.current.srcObject = stream;
+            setHasPermission(true);
+          } catch {
+            setHasPermission(false);
+          }
+        } else {
+          const { status } = await Camera.requestCameraPermissionsAsync();
+          setHasPermission(status === "granted");
+        }
+      };
+
+      activateCamera();
+
+      return () => {
+        if (Platform.OS === "web" && mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+          mediaStreamRef.current = null;
+        }
+        if (cameraRef.current) {
+          cameraRef.current.pausePreview?.();
+        }
+      };
+    }, [])
+  );
+
   if (hasPermission === null) {
-    return <Text>Requesting camera permission...</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+    return <View style={styles.center}><Text>Requesting camera permission...</Text></View>;
   }
 
+  if (hasPermission === false) {
+    return <View style={styles.center}><Text>No access to camera</Text></View>;
+  }
+
+  // ✅ Photo preview
+  if (photoUri) {
+    return (
+      <View style={styles.previewContainer}>
+        <Image source={{ uri: photoUri }} style={styles.previewImage} />
+
+        {/* Done button */}
+        <TouchableOpacity style={styles.doneButton} onPress={() => console.log("✅ Photo confirmed:", photoUri)}>
+          <Text style={styles.doneText}>Done</Text>
+        </TouchableOpacity>
+
+        {/* Retake button */}
+        <TouchableOpacity style={styles.retakeButton} onPress={() => setPhotoUri(null)}>
+          <Text style={styles.retakeText}>Retake</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // ✅ Camera with working capture button
   return (
     <View style={styles.container}>
-      <Camera
-        style={styles.camera}
-        ref={(ref) => setCameraRef(ref)}
-        type={Camera.Constants.Type.back}
-      />
-      <Button
-        title="Take Photo"
+      {Platform.OS === "web" ? (
+        <video ref={videoRef} style={styles.webCamera} autoPlay playsInline />
+      ) : (
+        <Camera
+          style={styles.camera}
+          ref={cameraRef}
+          type={Camera.Constants.Type.back}
+          onCameraReady={() => setCameraReady(true)}
+        />
+      )}
+
+      {/* 🔘 Capture button */}
+      <TouchableOpacity
+        style={styles.floatingButton}
         onPress={async () => {
-          if (cameraRef) {
-            const photo = await cameraRef.takePictureAsync();
-            console.log("Photo captured:", photo.uri);
+          if (Platform.OS === "web" && videoRef.current) {
+            // ✅ Web photo capture using canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL("image/png");
+            setPhotoUri(dataUrl);
+          } else if (cameraRef.current && cameraReady) {
+            // ✅ Native photo capture
+            const photo = await cameraRef.current.takePictureAsync();
+            setPhotoUri(photo.uri);
           }
         }}
       />
@@ -41,6 +129,45 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  camera: { flex: 1 }
+  container: { flex: 1, backgroundColor: "#000" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  camera: { flex: 1 },
+  webCamera: { width: "100%", height: "100%" },
+
+  floatingButton: {
+    position: "absolute",
+    bottom: 80, // 👈 Tab bar ke upar
+    alignSelf: "center",
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "white",
+    borderWidth: 5,
+    borderColor: "#ccc",
+  },
+
+  previewContainer: { flex: 1, backgroundColor: "#000" },
+  previewImage: { flex: 1, resizeMode: "contain" },
+
+  doneButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "#4DBF99",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  doneText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+
+  retakeButton: {
+    position: "absolute",
+    bottom: 40,
+    alignSelf: "center",
+    backgroundColor: "rgba(255,255,255,0.8)",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retakeText: { color: "#000", fontWeight: "bold", fontSize: 16 },
 });
