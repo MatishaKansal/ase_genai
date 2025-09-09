@@ -1,28 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
   View,
   Text,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import styles from "./HomeStyles";
 import { useNavigation } from "@react-navigation/native";
 
-
 export default function Home() {
-    const navigation = useNavigation();
-    
+  const navigation = useNavigation();
+  const [hoveredBox, setHoveredBox] = useState(null);
+
+  const contentData = [
+    {
+      id: 1,
+      icon: "upload",
+      color: "#43D9D9",
+      title: "Upload & Score Your Documents",
+      text: "Simply click a photo of your legal document, upload it, and let our AI provide a clear, easy-to-understand score.",
+    },
+    {
+      id: 2,
+      icon: "comment-alt",
+      color: "rgb(100,209,100)",
+      title: "Get Instant AI Consultation",
+      text: "Chat with our AI about your documents. Ask questions, clarify clauses, and understand complex legal terms without the hassle.",
+    },
+    {
+      id: 3,
+      icon: "lock",
+      color: "rgb(217,184,123)",
+      title: "Keep Your Records Secure",
+      text: "Your documents and their scores are saved securely. Track your history and access past insights whenever you need them.",
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
-    //   contentContainerStyle={{ paddingBottom: 50 }}
-      >
+      <ScrollView>
         {/* Navbar */}
         <View style={styles.navbar}>
           <Text style={styles.logo}>LOGO</Text>
-          <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Login")}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("Login")}
+          >
             <Text style={styles.loginText}>Login / Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -38,50 +64,26 @@ export default function Home() {
 
         {/* Content Section */}
         <View style={styles.content}>
-          {/* Box 1 */}
-          <View style={styles.contentBox}>
-            <FontAwesome5
-              name="upload"
-              size={50}
-              color="#43D9D9"
-              style={styles.boxIcon}
-            />
-            <Text style={styles.boxTitle}>Upload & Score Your Documents</Text>
-            <Text style={styles.boxText}>
-              Simply click a photo of your legal document, upload it, and let
-              our AI provide a clear, easy-to-understand score.
-            </Text>
-          </View>
-
-          {/* Box 2 */}
-          <View style={styles.contentBox}>
-            <FontAwesome5
-              name="comment-alt"
-              size={50}
-              color="rgb(100,209,100)"
-              style={styles.boxIcon}
-            />
-            <Text style={styles.boxTitle}>Get Instant AI Consultation</Text>
-            <Text style={styles.boxText}>
-              Chat with our AI about your documents. Ask questions, clarify
-              clauses, and understand complex legal terms without the hassle.
-            </Text>
-          </View>
-
-          {/* Box 3 */}
-          <View style={styles.contentBox}>
-            <FontAwesome5
-              name="lock"
-              size={50}
-              color="rgb(217,184,123)"
-              style={styles.boxIcon}
-            />
-            <Text style={styles.boxTitle}>Keep Your Records Secure</Text>
-            <Text style={styles.boxText}>
-              Your documents and their scores are saved securely. Track your
-              history and access past insights whenever you need them.
-            </Text>
-          </View>
+          {contentData.map((box) => (
+            <Pressable
+              key={box.id}
+              style={[
+                styles.contentBox,
+                hoveredBox === box.id && styles.contentBoxHover,
+              ]}
+              onMouseEnter={() => setHoveredBox(box.id)}
+              onMouseLeave={() => setHoveredBox(null)}
+            >
+              <FontAwesome5
+                name={box.icon}
+                size={50}
+                color={box.color}
+                style={styles.boxIcon}
+              />
+              <Text style={styles.boxTitle}>{box.title}</Text>
+              <Text style={styles.boxText}>{box.text}</Text>
+            </Pressable>
+          ))}
         </View>
 
         {/* Footer */}

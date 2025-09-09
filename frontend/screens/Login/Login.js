@@ -43,7 +43,7 @@ export default function Login() {
 
         Alert.alert("Success", "Login successful!");
         setMessage("");
-        navigation.navigate("Home"); // 👈 change to your main screen name
+        navigation.navigate("ChatTabs"); // 👈 change to your main screen name
       } else {
         Alert.alert("Error", "Login failed: Token not received");
       }
@@ -85,8 +85,8 @@ export default function Login() {
           {message ? <Text style={styles.error}>{message}</Text> : null}
 
           <TouchableOpacity style={styles.signUpButton}
-            onPress={() => navigation.navigate("ChatTabs")} 
-          // onPress={handleSubmit}
+            // onPress={() => navigation.navigate("ChatTabs")} 
+          onPress={handleSubmit}
           >
             <Text style={styles.signUpText}>Login</Text>
           </TouchableOpacity>

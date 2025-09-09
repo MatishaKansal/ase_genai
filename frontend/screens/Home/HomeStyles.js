@@ -8,7 +8,7 @@ const styles = StyleSheet.create({
 
   // Navbar
   navbar: {
-    height: 64, // 4rem ≈ 64px
+    height: 64,
     backgroundColor: "#151C24",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     color: "#f59e0b",
-    fontSize: 30, // 3rem ≈ 30px
+    fontSize: 30,
     marginLeft: 20,
     backgroundColor: "#151C24",
     textDecorationLine: "none",
@@ -38,8 +38,7 @@ const styles = StyleSheet.create({
 
   // Hero section
   heroTitle: {
-    // borderWidth:2,
-    textAlign:"center",
+    textAlign: "center",
     marginTop: 70,
     marginLeft: 50,
     marginRight: 50,
@@ -48,10 +47,10 @@ const styles = StyleSheet.create({
   },
   heroSubtitle: {
     marginTop: 30,
-    textAlign:"center",
+    textAlign: "center",
     marginLeft: 50,
     marginRight: 50,
-    fontSize: 20, // 2rem ≈ 20px
+    fontSize: 20,
     color: "#333",
   },
 
@@ -67,15 +66,24 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
   },
   contentBox: {
-
     marginTop: 100,
     height: 350,
     width: "90%",
-    maxWidth:400,
+    maxWidth: 400,
     borderRadius: 50,
     backgroundColor: "white",
     alignItems: "center",
     padding: 20,
+    transitionDuration: "0.3s",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 2, height: 4 },
+    shadowRadius: 6,
+  },
+  contentBoxHover: {
+    backgroundColor: "#dbd0d0",
+    transform: [{ scale: 1.05 }],
+    shadowOpacity: 0.3,
   },
   boxIcon: {
     fontSize: 50,
@@ -97,7 +105,6 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
-    // borderWidth: 2,
     height: 500,
     backgroundColor: "#151C24",
     justifyContent: "center",
@@ -113,9 +120,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "white",
     marginBottom: 30,
-    textAlign:"center",
-    marginLeft:15,
-    marginRight:15,
+    textAlign: "center",
+    marginLeft: 15,
+    marginRight: 15,
   },
   footerButton: {
     backgroundColor: "#f59e0b",
@@ -124,6 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
+    transitionDuration: "0.3s",
   },
   footerButtonText: {
     fontSize: 24,

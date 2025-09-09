@@ -6,41 +6,42 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f9fafb",
+        paddingBottom: 60, // niche tab navigator ke liye jagah
     },
     top: {
         width: "100%",
-        paddingHorizontal: 40,
-        paddingVertical: 15,
+        paddingHorizontal: 20,
+        paddingVertical: 5,
         borderBottomWidth: 2,
         borderBottomColor: "#ddd",
-        height: height * 0.15, // 10vh equivalent
+        height: 60,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         backgroundColor: "#1f2937",
+        // borderWidth: 2,
+        // borderColor: "white",
     },
     profile: {
         flexDirection: "row",
         alignItems: "center",
-        gap: width*0.01,
-        marginLeft: width * 0.005,
+        gap: width * 0.01,
+        // marginLeft: "auto",
     },
     avatar: {
-        height: 70,
-        width: 70,
+        height: 50,
+        width: 50,
         borderRadius: 35,
         borderWidth: 3,
         borderColor: "#ccc",
     },
     profileName: {
-        fontSize: 15,
-        fontWeight: "bold",
-        color: "#f59e0b",
-        fontSize: Platform.OS === "web" ? width*0.025 : 15,
+        fontSize: 20,
+        fontWeight: "600",
+        color: "white",
     },
     settings_container: {
         position: "relative",
-        marginRight: width * 0.0001,
     },
     dropdown: {
         position: "absolute",
@@ -66,45 +67,40 @@ const styles = StyleSheet.create({
         marginVertical: 4,
     },
     history: {
-        marginTop: height * 0.08,
+        marginTop: 50,
         alignItems: "center",
-        gap: 20,
         justifyContent: "center",
+        marginBottom: -60,
     },
     historyHeading: {
-        fontSize: 24,
+        fontSize: 48,
         fontWeight: "bold",
-        color: "#1f2937",
-    },
-    null_message: {
-
+        color: "#f59e0b",
     },
     scrollContainer: {
         flex: 1,
-        maxHeight: height * 0.5, // This limits height so scrollbar shows when content overflows
         width: "100%",
         ...Platform.select({
             web: {
-                overflowY: "auto",  // Enable scrollbar on web
+                overflowY: "auto",
             },
         }),
     },
     historySection: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "space-around",
-        alignItems: "center",
+        justifyContent: "space-between", // 3 per row on web
         width: "90%",
+        // height: "100%",
         alignSelf: "center",
         paddingVertical: 20,
-        rowGap: 20,
-        columnGap: height * 0.02,
+        gap: 20,
+        // borderWidth: 3,
     },
-
     historyCard: {
-        width: Platform.OS === "web" ? "25%" : "90%", // 3 cards on web, 1 card on mobile
-        minWidth: 250, // so cards don't shrink too small
-        height: height * 0.3,
+        width: Platform.OS === "web" ? "30%" : "45%", // web: 3 cards per row, mobile: 2 per row
+        width: 200,
+        height: 200,
         backgroundColor: "white",
         borderRadius: 10,
         padding: 10,
@@ -113,29 +109,15 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 3, height: 6 },
         shadowRadius: 4,
         transform: [{ scale: 1 }],
+        marginBottom: 15,
         ...Platform.select({
             web: { transitionDuration: "300ms" },
         }),
+        marginLeft: 15,
+        marginRight:15,
+        justifyContent: "center",
+
     },
-historyCard: {
-    width: Platform.OS === "web" ? "25%" : "80%", // 3 per row on web, 2 per row on mobile
-    minWidth: 250,
-    height: height * 0.3,
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 3, height: 6 },
-    shadowRadius: 4,
-    transform: [{ scale: 1 }],
-    margin: 5, // give spacing between cards
-    ...Platform.select({
-        web: { transitionDuration: "300ms" },
-    }),
-},
-
-
     historyCardHovered: {
         ...Platform.select({
             web: {
@@ -152,7 +134,6 @@ historyCard: {
         height: height * 0.06,
         backgroundColor: "rgba(31, 41, 55, 0.7)",
         borderRadius: 10,
-        // borderTopRightRadius: 10,
         justifyContent: "center",
         paddingHorizontal: 5,
         overflow: "hidden",
@@ -161,16 +142,22 @@ historyCard: {
         color: "white",
         fontWeight: "bold",
         fontSize: 16,
-        overflow: "hidden",  // ensures ellipsis works properly
+        overflow: "hidden",
     },
-
     historyCardBottom: {
         flex: 1,
         padding: 10,
         color: "#1f2937",
         opacity: 0.8,
-        overflow: "hidden", // ensures truncation works
+        overflow: "hidden",
     },
+    flat_list:{
+        flex: 1, 
+        maxHeight: "100%",
+        width : "70%",
+        maxWidth: 750,
+        // justifyContent: "center",
+    }
 });
 
 export default styles;
