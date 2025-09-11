@@ -35,6 +35,57 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginRight: 10,
   },
+  bottomContainer: {
+  width: "100%",
+  borderTopWidth: 1,
+  borderColor: "#ddd",
+  paddingBottom: 5,
+  alignSelf: "center",
+    width: "100%",
+
+    justifyContent: "center",
+    alignItems: "center",
+},
+
+previewContainer: {
+  flexDirection: "row",
+  padding: 5,
+  borderTopLeftRadius: 5,
+  borderTopRightRadius: 5,
+  maxHeight: 80,
+},
+fileBox: {
+  marginRight: 8,
+  position: "relative",
+  backgroundColor: "#f1f1f1", 
+  padding: 5, 
+  marginRight: 8, 
+  borderRadius: 5, 
+  minWidth: 80, 
+  maxWidth: 120, 
+  alignItems: "center", 
+  justifyContent: "center", 
+  position: "relative", 
+  borderWidth: 1, 
+  borderColor: "#ddd",
+},
+
+removeBtn: {
+  position: "absolute",
+  top: -5,
+  right: -5,
+  backgroundColor: "red",
+  borderRadius: 10,
+  paddingHorizontal: 5,
+},
+  fileName: {
+    fontSize: 12,
+    color: "black",
+  },
+  chatArea: {
+  flex: 1,
+  backgroundColor: "white",
+},
   search: {
     // borderWidth:2,
     alignSelf: "center",

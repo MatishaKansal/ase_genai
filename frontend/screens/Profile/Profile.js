@@ -7,6 +7,7 @@ import {
   FlatList,
   Dimensions,
   SafeAreaView,
+  TouchableOpacity,
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -49,6 +50,7 @@ const Profile = () => {
     fetchData();
   }, []);
 
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.multiRemove(["token", "user"]);
@@ -64,8 +66,30 @@ const Profile = () => {
     }
   };
 
+
   return (
     <View style={styles.container}>
+
+      {/* Full-screen overlay: shown only when dropdownOpen.
+          It catches taps anywhere and closes the dropdown.
+          overlay zIndex must be lower than dropdown's zIndex so dropdown is clickable. */}
+      {dropdownOpen && (
+        <Pressable
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            // semi-transparent background helps debugging; set to 'transparent' if you prefer
+            backgroundColor: "rgba(0,0,0,0.0)",
+            zIndex: 1,
+          }}
+          onPress={() => setDropdownOpen(false)}
+        />
+      )}
+
+
       <SafeAreaView style={{ backgroundColor: "#1f2937" }}>
         {/* Header Section */}
         <View style={styles.top}>
@@ -80,43 +104,49 @@ const Profile = () => {
           </View>
 
           <View style={styles.settings_container}>
-            <Pressable onPress={() => setDropdownOpen(!dropdownOpen)}>
+            <TouchableOpacity onPress={(e) => {
+              e.stopPropagation();
+              setDropdownOpen(!dropdownOpen);
+            }}>
               <Ionicons name="settings-outline" size={34} color="white" />
-            </Pressable>
+            </TouchableOpacity>
 
             {dropdownOpen && (
               <View style={styles.dropdown}>
-                <Text
-                    style={[
+                {/* Edit Profile */}
+                <TouchableOpacity
+                  onPress={() => console.log("Edit Profile pressed")}
+                  style={[
                     styles.dropdown_item,
                     Platform.OS === "web" ? { cursor: "pointer" } : {},
-                    ]}
+                  ]}
                 >
-                    Edit Profile
-                </Text>
-                <Text
-                    style={[
+                  <Text style={styles.dropdown_text}>Edit Profile</Text>
+                </TouchableOpacity>
+
+                {/* Change Password */}
+                <TouchableOpacity
+                  onPress={() => console.log("Change Password pressed")}
+                  style={[
                     styles.dropdown_item,
                     Platform.OS === "web" ? { cursor: "pointer" } : {},
-                    ]}
+                  ]}
                 >
-                    Change Password
-                </Text>
-                {/* <View style={styles.hr} /> */}
-                <Pressable
-                    onPress={handleLogout}
-                    style={Platform.OS === "web" ? { cursor: "pointer" } : {}}
+                  <Text style={styles.dropdown_text}>Change Password</Text>
+                </TouchableOpacity>
+
+                {/* Logout with borderTop as divider */}
+                <TouchableOpacity
+                  onPress={handleLogout}
+                  style={[
+                    styles.dropdown_item,
+                    { borderTopWidth: 1, borderTopColor: "#c8c6c6" },
+                    Platform.OS === "web" ? { cursor: "pointer" } : {},
+                  ]}
                 >
-                    <Text
-                    style={[
-                        styles.dropdown_item,
-                        Platform.OS === "web" ? { cursor: "pointer" } : {},
-                    ]}
-                    >
-                    Logout
-                    </Text>
-                </Pressable>
-                </View>
+                  <Text style={styles.dropdown_text}>Logout</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>
@@ -144,8 +174,8 @@ const Profile = () => {
                 style={[
                   styles.historyCard,
                   Platform.OS === "web" &&
-                    hoverIndex === index &&
-                    styles.historyCardHovered,
+                  hoverIndex === index &&
+                  styles.historyCardHovered,
                 ]}
                 onMouseEnter={() =>
                   Platform.OS === "web" && setHoverIndex(index)

@@ -42,11 +42,13 @@ const styles = StyleSheet.create({
     },
     settings_container: {
         position: "relative",
+        zIndex:300,
     },
     dropdown: {
         position: "absolute",
         right: 0,
         top: 40,
+        // bottom: -20,
         backgroundColor: "white",
         borderWidth: 1,
         borderColor: "#ddd",
@@ -58,13 +60,18 @@ const styles = StyleSheet.create({
         zIndex: 200,
     },
     dropdown_item: {
-        padding: 10,
-        cursor: Platform.OS === "web" ? "pointer" : "default",
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        fontSize: 16,
+        // borderWidth: 0,
     },
     hr: {
-        height: 1,
-        backgroundColor: "#c8c6c6",
-        marginVertical: 4,
+    height: 1,
+    backgroundColor: "#c8c6c6",
+    alignSelf: "stretch",   // bas apne container tak
+    marginVertical: 4,
+    zIndex: -1,             // hr ko click ke upar na laye
+
     },
     history: {
         marginTop: 50,
