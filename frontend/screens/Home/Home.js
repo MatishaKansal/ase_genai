@@ -92,7 +92,7 @@ export default function Home() {
           <Text style={styles.footerSubtitle}>
             Gain peace of mind and protect yourself from fraud
           </Text>
-          <TouchableOpacity style={styles.footerButton}>
+          <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate("Login")}>
             <Text style={styles.footerButtonText}>Get Started</Text>
           </TouchableOpacity>
         </View>
