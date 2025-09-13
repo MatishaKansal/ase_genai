@@ -26,6 +26,7 @@ const login = async (req, resp) => {
             message: 'Logged in Successfully',
             token: generateToken(user._id),
             user: {
+                userId: user._id,
                 email: user.email,
                 userName: user.userName,
                 profilePic: user.profilePic
@@ -52,10 +53,12 @@ const signup = async (req, resp) => {
         const randomAvatar = `https://avatar.iran.liara.run/public/${idx}.png`;
 
         const user = await User.create({ email, userName, password, profilePic: randomAvatar });
+        await user.save();
 
         if (user) {
             resp.status(201).json({
                 user: {
+                    userId: user._id,
                     email: user.email,
                     userName: user.userName,
                     profilePic: user.profilePic

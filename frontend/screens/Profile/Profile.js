@@ -31,23 +31,35 @@ const Profile = () => {
       try {
         const user = await AsyncStorage.getItem("user");
         if (user) setUserData(JSON.parse(user));
+        const { userId } = JSON.parse(user);
 
         // Dummy data for now
         setInfo([
           { heading: "Chat 1 gggggggggggg", data: "Some chat history text ..." },
-          { heading: "Chat 2", data: "More chat history here" },
-          { heading: "Chat 3", data: "More chat history here" },
-          { heading: "Chat 4", data: "More chat history here" },
-          { heading: "Chat 5", data: "More chat history here" },
-          { heading: "Chat 6", data: "More chat history here" },
-          { heading: "Chat 7", data: "More chat history here" },
-          { heading: "Chat 8", data: "More chat history here" },
+          { title: "Chat 2", preview: "More chat history here" },
+          { title: "Chat 3", preview: "More chat history here" },
+          { title: "Chat 4", preview: "More chat history here" },
+          { title: "Chat 5", preview: "More chat history here" },
+          { title: "Chat 6", preview: "More chat history here" },
+          { title: "Chat 7", preview: "More chat history here" },
+          { title: "Chat 8", preview: "More chat history here" },
         ]);
       } catch (err) {
         console.log("Error:", err);
       }
     };
     fetchData();
+
+    // const fetchNotebooks = async () => {
+    //   try {
+    //     const res = await axios.get(`/api/chat/${userId}`);
+    //     setInfo(res.data);
+    //   } catch (err) {
+    //     console.log("Error fetching notebooks:", err.message);
+    //   }
+    // };
+
+    // fetchNotebooks();
   }, []);
 
 
@@ -198,7 +210,7 @@ const Profile = () => {
                     numberOfLines={1}
                     ellipsizeMode="tail"
                   >
-                    {item.heading}
+                    {item.title}
                   </Text>
                 </LinearGradient>
 
@@ -207,7 +219,7 @@ const Profile = () => {
                   numberOfLines={3}
                   ellipsizeMode="tail"
                 >
-                  {item.data}
+                  {item.preview}
                 </Text>
               </View>
             )}
