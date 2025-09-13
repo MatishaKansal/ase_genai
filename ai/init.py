@@ -1,6 +1,16 @@
+"""
+App startup and health checks.
+
+What this does in simple terms:
+- Prepares the AI system when the app starts (loads standard/core clauses and turns them into vectors).
+- Keeps a small in-memory store for text pieces and their vectors so we can search quickly.
+- Exposes a /healthz endpoint to show if the app is ready.
+"""
 import faiss
 import os
 import time
+from .normal_data import CORE_CLAUSES 
+from .utils.embedding_utils import get_embeddings
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -15,14 +25,29 @@ app_state: Dict[str, Any] = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
-    Initializes the vector store and normal embeddings on startup.
+    Runs once when the server starts, then once again on shutdown.
+    Here we compute embeddings (numeric vectors) for the known core clauses
+    and set up a shared state dictionary (app_state) that other endpoints use.
     """
     print("AI Backend starting up...")
-
+    # 1. Generate and store embeddings for the core clauses
+    print(f"Generating embeddings for {len(CORE_CLAUSES)} core clauses...")
+    if CORE_CLAUSES:
+        # Get the text of all core clauses
+        core_clause_texts = list(CORE_CLAUSES.values())
+        # Get the embeddings for all of them in a single API call
+        embeddings = get_embeddings(core_clause_texts)
+        # Create a dictionary that maps each clause name to its corresponding embedding
+        app_state["core_embeddings"] = {name: emb for name, emb in zip(CORE_CLAUSES.keys(), embeddings)}
+        print("Core clause embeddings are ready!")
+    else:
+        app_state["core_embeddings"] = {}
+        print("No core clauses found. Skipping core embeddings generation.")
+    
     # Record startup time for health checks
     app_state["startup_time"] = time.time()
 
-    # 1. Initialize app state. Vector store will be created lazily on first document.
+    # Initialize app state. Vector store is created later when the first document is processed.
     app_state["faiss_index"] = None
     app_state["chunks"] = []
     
@@ -54,6 +79,7 @@ def healthz():
     creds_set = bool(creds_path)
     creds_exists = bool(creds_path and os.path.isfile(creds_path))
 
+    # If we haven't built the index yet, we report "degraded" (still fine to accept uploads)
     status = "ok" if faiss_ok else "degraded"
 
     return {

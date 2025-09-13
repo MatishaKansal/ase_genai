@@ -1,190 +1,194 @@
-# AI Document Processor
+## Generative AI for Demystifying Legal Documents
 
-A comprehensive AI-powered document processing system that combines OCR, embeddings, and summarization.
+This project is our submission for Google’s GenAI Exchange hackathon.
+
+Goal: build a reliable, private, and supportive assistant that simplifies complex legal documents (rental agreements, etc.) into plain language—summarizes, explains clauses, answers questions, and flags missing standard protections.
+
+Key outcomes:
+- Clear, accessible summaries with a visible disclaimer
+- Clause-level Q&A grounded on the uploaded document (no hallucinations)
+- Detection of commonly expected “core clauses” that are missing
+- Optional translation and text-to-speech for accessibility
+
+---
 
 ## Features
 
-- **Document OCR**: Extract text from PDF documents using Google Cloud Document AI
-- **Text Chunking**: Intelligent text segmentation for optimal processing
-- **Embedding Generation**: Create vector representations using Google Vertex AI
-- **Vector Storage**: FAISS-based vector database for efficient similarity search
-- **Document Summarization**: AI-powered summaries using Google Gemini
-- **REST API**: FastAPI-based web service with comprehensive error handling
+- Google Document AI + Vision OCR for robust text extraction
+- Vertex AI embeddings + FAISS for retrieval (RAG)
+- Gemini-based summarization and grounded Q&A
+- Dataset-driven “core clauses” detection (auto-generated from sample agreements)
+- Translation (Google Translate) and audio synthesis (Google TTS)
+- Health endpoint and resilient retries for robustness
+
+---
 
 ## Architecture
 
+1) Ingestion: file upload (PDF/image) → OCR → chunking
+2) Indexing: embeddings → FAISS index (in-memory)
+3) Reasoning: Gemini summarization + grounded Q&A over retrieved chunks
+4) Safety: missing “core clauses” detection vs dataset-derived normals
+5) Accessibility: translation + TTS, with a configurable disclaimer
+
+---
+
+## Project structure
+
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   PDF Upload   │───▶│   OCR Process   │───▶│  Text Chunks   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                       │
-                                                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Embeddings   │───▶│   Vector Store  │───▶│    Summary      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-## Installation
-
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-2. Set up environment variables (create `.env` file):
-```bash
-# Google Cloud Configuration
-GCP_PROJECT_ID=your-gcp-project-id
-GCP_LOCATION=us
-DOCAI_PROCESSOR_ID=your-docai-processor-id
-
-# Optional settings
-MAX_FILE_SIZE_MB=10
-CHUNK_SIZE=500
-```
-
-3. Set up Google Cloud credentials:
-```bash
-export GOOGLE_APPLICATION_CREDENTIALS="path/to/your/service-account-key.json"
+ai/
+├── init.py                 # FastAPI app & startup (embeds core clauses)
+├── processor_app.py        # API endpoints: /api/process-document, /api/chat
+├── config.py               # All settings pulled from .env with sensible defaults
+├── generate_core_clauses.py# Builds CORE_CLAUSES from ai/dataset/*.docx
+├── normal_data.py          # Generated core clauses (do not edit manually)
+├── utils/
+│   ├── ocr_utils.py        # Document AI + Vision OCR
+│   ├── embedding_utils.py  # Vertex AI embeddings (batched + retries)
+│   ├── summarizer_utils.py # Gemini-based summary/answers (+ disclaimer)
+│   ├── translation_utils.py# Translate with chunking and lang normalization
+│   ├── tts_utils.py        # TTS with chunking and GCS upload
+│   ├── vectorstore_utils.py# FAISS vector store helpers
+│   └── anomaly_utils.py    # Missing-core-clauses detection
+├── dataset/                # Sample agreements (.docx) for core-clause generation
+├── requirements.txt
+├── env_template.txt
+└── README.md
 ```
 
-## Usage
+---
 
-### Starting the Service
+## Prerequisites
 
-```bash
-cd ase_genai/ai
-python processor_app.py
+- Python 3.11+ recommended
+- Google Cloud project with the following APIs enabled:
+  - Vertex AI, Document AI, Vision, Translate v2, Text-to-Speech, Cloud Storage
+- Service account with roles: Vertex AI User, Document AI API User, Vision API User, Cloud Translation API User, Cloud TTS User, Storage Object Admin (or a tighter, bucket-scoped role)
+
+---
+
+## Setup
+
+1) Install dependencies:
+```powershell
+pip install -r ai/requirements.txt
 ```
 
-The service will start on `http://localhost:8000`
+2) Create a `.env` in the repository root (the folder that contains `ai/`) from `ai/env_template.txt` and fill values:
+```powershell
+copy ai\env_template.txt .env
+# edit .env to set project, locations, processor id, bucket, and credentials
+```
+Note: Place `.env` at the repository root (next to the `ai/` folder), not inside `ai/`.
 
-### API Endpoints
-
-#### Health Check
-```bash
-GET /
-GET /healthz
+3) Ensure ADC credentials:
+```powershell
+$env:GOOGLE_APPLICATION_CREDENTIALS="<absolute_path_to_service_account.json>"
 ```
 
-#### Document Processing
-```bash
-POST /api/process-document
-Content-Type: multipart/form-data
+4) Generate core clauses (required before first run):
+```powershell
+cd ai
+python generate_core_clauses.py
+```
+This reads `ai/dataset/*.docx`, clusters similar clauses, applies coverage/size filters, and writes `ai/normal_data.py` (a backup is created automatically). Re-run this anytime you change the dataset or want to retune parameters.
 
-file: [PDF file]
+Optional: tune clustering via environment variables (PowerShell example):
+```powershell
+cd ai
+$env:CLUSTERING_THRESHOLD='0.50'
+$env:MIN_CLUSTER_SIZE='5'
+$env:COVERAGE_THRESHOLD='0.60'
+$env:TARGET_MIN='10'
+$env:TARGET_MAX='15'
+python generate_core_clauses.py
 ```
 
-### Example Response
+5) Run the API:
+```powershell
+uvicorn ai.init:app --host 0.0.0.0 --port 8000 --reload
+```
 
+---
+
+## API
+
+### Process a document
+- POST `/api/process-document` (multipart/form-data)
+  - file: the PDF/image
+  - language: target language code (e.g., `en`, `hi`)
+
+Response:
 ```json
 {
-  "summary": "This contract outlines the terms...",
-  "total_chunks": 25,
+  "summary": "Plain-language summary with disclaimer",
+  "translated_summary": "… (matches requested language)",
+  "audio_url": "https://storage.googleapis.com/<bucket>/audio/<id>.mp3",
+  "total_chunks": 42,
   "processing_time": 12.34,
-  "audio_url": "gs://.../audio.mp3",
-  "translated_summary": "..."
+  "is_suspicious": true,
+  "suspicion_note": "Translated note listing a few missing core clauses +N more"
 }
 ```
 
-## Configuration
+### Chat over the document
+- POST `/api/chat?query=What is the notice period?&language=hi`
+  - Returns an answer grounded strictly on indexed chunks + disclaimer
 
-### Environment Variables
+---
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GCP_PROJECT_ID` | Google Cloud Project ID | Required |
-| `GCP_LOCATION` | Google Cloud region (Vertex/DocAI) | `us-central1` |
-| `DOCAI_PROCESSOR_ID` | Document AI processor ID | Required |
-| `EMBEDDING_MODEL` | Vertex AI embedding model | `text-embedding-004` |
-| `MAX_FILE_SIZE_MB` | Maximum file size in MB | `10` |
-| `CHUNK_SIZE` | Words per text chunk | `500` |
+## Configuration (.env)
 
-### Performance Tuning
+Location: put your `.env` in the repository root (same folder where `ai/` resides).
 
-- **Batch Size**: Adjust `BATCH_SIZE` in embedding generation for optimal performance
-- **Chunk Size**: Modify `CHUNK_SIZE` based on document characteristics
-No anomaly detection is included; focus is on OCR, embeddings, and summarization.
+See `ai/env_template.txt` for all options. Key ones:
 
-## Error Handling
+- GCP_PROJECT_ID, GCP_LOCATION, DOCAI_LOCATION, DOCAI_PROCESSOR_ID, GCS_BUCKET_NAME
+- GOOGLE_APPLICATION_CREDENTIALS (path) or use ambient ADC
+- EMBEDDING_MODEL (default `text-embedding-004`)
+- CHUNK_SIZE (default 200)
+- ANOMALY_THRESHOLD (default 0.65)
+- DISCLAIMER_TEXT (customizable)
 
-The system includes comprehensive error handling:
+Optional prompt customization:
+- SUMMARY_PROMPT_TEMPLATE — must include `{context}` where document chunks are inserted (use `\n` for newlines in `.env`).
+- QA_PROMPT_TEMPLATE — must include `{context}` and `{question}` (use `\n` for newlines). If a template is malformed, the app falls back to a safe minimal prompt.
 
-- **Input Validation**: File type, size, and content validation
-- **API Error Handling**: Proper HTTP status codes and error messages
-- **Graceful Degradation**: Continues processing even if some components fail
-- **Logging**: Detailed logging for debugging and monitoring
+Generator tuning (optional):
+- CLUSTERING_THRESHOLD (merge aggressiveness)
+- MIN_CLUSTER_SIZE (min items per cluster)
+- COVERAGE_THRESHOLD (fraction of docs a cluster must cover)
+- TARGET_MIN / TARGET_MAX (auto-tune target count of core clauses)
 
-## Monitoring
+---
 
-### Logs
-- Application logs with configurable levels
-- Processing time tracking
-- Error and warning logging
+## Implementation notes
 
-### Metrics
-- Document processing time
-- Chunk and embedding counts
-- API response times
+- Embeddings are batched (≤250 per call) and retried with exponential backoff
+- TTS chunks the text by byte size to avoid API 5,000-byte limit
+- Translation and TTS support simple language normalization (e.g., `hi` → `hi-IN`)
+- Suspicion note is concise (up to 5 items + “+N more”) and is translated to match the summary language
+- Disclaimer is appended to all user-visible model outputs and can be customized via `.env`
 
-## Security
+---
 
-- **File Validation**: Strict file type and size restrictions
-- **Temporary File Cleanup**: Automatic cleanup of uploaded files
--- **Authentication**: Service Account (ADC) only; no API keys used for Gemini
-- **Input Sanitization**: Validation of all inputs
+## Security & privacy
 
-## Development
+- Uses service account (ADC), no API keys in code
+- Secrets are not committed; ensure `.gitignore` covers key files
+- Bucket uploads are restricted to audio artifacts only
+- Model outputs include a disclaimer; this is a first-point-of-contact assistant—not legal advice
 
-### Project Structure
-```
-ai/
-├── __init__.py
-├── config.py              # Configuration management
-├── processor_app.py       # Main FastAPI application
-├── requirements.txt       # Dependencies
-├── README.md             # This file
-├── utils/                # Utility modules
-│   ├── __init__.py
-│   ├── ocr_utils.py      # OCR processing
-│   ├── embedding_utils.py # Text embedding
-│   ├── vectorstore_utils.py # Vector database
-│   └── summarizer_utils.py # Text summarization
-└── vector_store/         # Vector database storage
-    └── __init__.py
-```
-
-### Adding New Features
-
-1. Create utility functions in appropriate modules
-2. Add configuration options in `config.py`
-3. Update the main processing pipeline in `processor_app.py`
-4. Add tests and documentation
+---
 
 ## Troubleshooting
 
-### Common Issues
+- 503/UNAVAILABLE on embeddings: automatic retries are built-in; re-run if needed
+- Document AI processor: verify region (`DOCAI_LOCATION`) and `PROCESSOR_ID`
+- TTS voice: fallback voices are used if preferred names aren’t available
 
-1. **Google Cloud Authentication**: Ensure service account credentials are properly set
-2. **API Quotas**: Monitor Vertex AI and Gemini API usage limits
-3. **Memory Issues**: Adjust batch sizes for large documents
-4. **File Permissions**: Ensure write access to vector store directory
-
-### Debug Mode
-
-Enable debug logging:
-```python
-import logging
-logging.basicConfig(level=logging.DEBUG)
-```
-
-## Contributing
-
-1. Follow the existing code style and patterns
-2. Add proper error handling and logging
-3. Include type hints and documentation
-4. Test with various document types and sizes
+---
 
 ## License
 
-[Your License Here]
+MIT (or your preferred license)

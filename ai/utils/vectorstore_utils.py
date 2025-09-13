@@ -1,3 +1,9 @@
+"""
+Helpers for our in-memory vector store (FAISS).
+
+We add vectors (embeddings) for document chunks and search for the most similar chunks
+for a given question.
+"""
 from typing import List, Tuple
 import numpy as np
 import faiss

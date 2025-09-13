@@ -1,16 +1,19 @@
 from google.cloud import documentai_v1 as documentai
 from google.cloud import vision
 
-# Assuming these are correctly imported from your config.py
-from ..config import PROJECT_ID, DOCAI_LOCATION, PROCESSOR_ID
+# Support running as a package (ai.utils) or directly from the ai/ folder
+try:  # package import
+    from ..config import PROJECT_ID, DOCAI_LOCATION, PROCESSOR_ID
+except ImportError:  # direct script import fallback
+    from config import PROJECT_ID, DOCAI_LOCATION, PROCESSOR_ID
 
 def extract_text_from_document(file_bytes: bytes) -> str:
-    """Alias wrapper to process PDFs; maintained for compatibility with callers."""
+    """Extract text from a PDF (helper kept for backwards compatibility)."""
     # Document AI is used primarily for PDFs and similar docs
     return extract_text_from_pdf(file_bytes)
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
-    """Extract text from a PDF using Google Cloud Document AI."""
+    """Extract text from a PDF using Google Cloud Document AI (server-side OCR)."""
     client = documentai.DocumentProcessorServiceClient()
     name = client.processor_path(PROJECT_ID, DOCAI_LOCATION, PROCESSOR_ID)
     
@@ -25,7 +28,7 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
     return result.document.text.strip()
 
 def extract_text_from_image(file_bytes: bytes) -> str:
-    """Extract text from an image using Google Cloud Vision API."""
+    """Extract text from an image using Google Cloud Vision API (good for photos/scans)."""
     client = vision.ImageAnnotatorClient()
     image = vision.Image(content=file_bytes)
     

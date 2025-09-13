@@ -1,3 +1,9 @@
+"""
+Text-to-Speech (TTS) helper using Google Cloud TTS.
+
+We break long text into smaller pieces, synthesize speech, then upload a single MP3
+to Cloud Storage and return its public URL.
+"""
 import os
 import uuid
 import tempfile
@@ -5,8 +11,11 @@ from google.cloud import texttospeech
 from google.cloud import storage
 from typing import List
 
-# Assuming this is correctly imported from your config.py
-from ..config import PROJECT_ID, BUCKET_NAME
+# Support both package and script execution imports
+try:
+    from ..config import PROJECT_ID, BUCKET_NAME
+except ImportError:
+    from config import PROJECT_ID, BUCKET_NAME
 
 
 def _normalize_tts_lang(code: str) -> str:
@@ -57,8 +66,7 @@ def _chunk_text_by_bytes(text: str, max_bytes: int = 4500) -> List[str]:
 
 def generate_audio(text: str, language: str = "en") -> str:
     """
-    Generates an audio file from text using Google Cloud TTS and uploads to GCS.
-    Returns the public URL of the audio file.
+    Convert text to speech, upload MP3 to Cloud Storage, and return a public URL.
     """
     if not text:
         return ""
