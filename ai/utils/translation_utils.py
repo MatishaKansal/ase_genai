@@ -1,3 +1,9 @@
+"""
+Translation helpers using Google Cloud Translation (v2 API).
+
+We normalize language codes and translate long texts in manageable chunks
+to avoid size limits.
+"""
 from google.cloud import translate_v2 as translate
 from typing import List
 
@@ -39,7 +45,7 @@ def _chunk_text(text: str, max_len: int = 4000) -> List[str]:
 
 
 def translate_text(text: str, target_language: str) -> str:
-    """Translates text to the target language using Google Cloud Translation API (v2)."""
+    """Translate text into the requested language using Google Cloud Translation (v2)."""
     if not text:
         return text
     lang = _normalize_lang(target_language)
