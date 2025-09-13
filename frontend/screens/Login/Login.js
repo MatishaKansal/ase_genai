@@ -7,7 +7,7 @@ import { useWindowDimensions } from "react-native";
 import styles from "./LoginStyles";
 import Header from "../../components/Header";
 
-const baseUrl = "http://localhost:5000"; // change to your backend IP
+const baseUrl = "https://4ca393730fae.ngrok-free.app";
 
 export default function Login() {
   const { width } = useWindowDimensions();

@@ -24,15 +24,26 @@ export default function TabNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: { backgroundColor: "white", height: 70, paddingTop: 10 },
+        tabBarStyle: { 
+          backgroundColor: "#ffffffff", 
+          height: 80, 
+          // paddingTop: -10,
+          // borderTopColor: "#e5e7eb", 
+          // borderTopWidth: 3,
+        },
       }}
     >
       <Tab.Screen
         name="Profile"
         component={Profile}
         options={{
-          tabBarIcon: () => (
-            <Ionicons name="person-circle-outline" size={40} color="black" />
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name="person-circle-outline"
+              size={40}
+              color={focused ? "#8b5cf6" : "#d2bfff"} // purple active, gray inactive
+              style={{ marginBottom: -10 , marginRight: -10}}
+            />
           ),
         }}
       />
@@ -41,11 +52,10 @@ export default function TabNavigator() {
         name="Camera"
         component={Camera}
         options={{
-          // 👇 Important: Camera screen fresh mount/unmount for direct load
           unmountOnBlur: true,
           tabBarButton: (props) => (
             <CameraButton {...props}>
-              <Ionicons name="camera" size={40} color="black" />
+              <Ionicons name="camera" size={40} color="#ffffff" /> 
             </CameraButton>
           ),
         }}
@@ -55,11 +65,12 @@ export default function TabNavigator() {
         name="Chat"
         component={Chat}
         options={{
-          tabBarIcon: () => (
+          tabBarIcon: ({ focused }) => (
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={40}
-              color="black"
+              color={focused ? "#10b981" : "#9de8cf"} // green active, gray inactive
+              style={{ marginBottom: -10 , marginRight: -10}}
             />
           ),
         }}
@@ -74,13 +85,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  innerCircle: {
-    width: 65,
-    height: 65,
-    borderRadius: 35,
-    backgroundColor: "#d1d5db",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
+innerCircle: {
+  width: 80, // bigger circle
+  height: 80,
+  borderRadius: 40, // half of width/height
+  backgroundColor: "#6394ff",
+  justifyContent: "center",
+  alignItems: "center",
+  elevation: 5,
+}
 });
