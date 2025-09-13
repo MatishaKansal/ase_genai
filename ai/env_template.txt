@@ -5,18 +5,9 @@ GCP_PROJECT_ID=your-actual-gcp-project-id
 GCP_LOCATION=us-central1
 DOCAI_PROCESSOR_ID=your-actual-docai-processor-id
 
-# Vertex AI Configuration
-EMBEDDING_MODEL=textembedding-gecko@latest
-
-# Gemini API Configuration
-GEMINI_API_KEY=your-actual-gemini-api-key
+# Vertex AI Configuration (ADC only)
+EMBEDDING_MODEL=text-embedding-004
 
 # Application Settings
-VECTOR_STORE_PATH=vector_store/faiss_index
-MAX_FILE_SIZE_MB=10
-CHUNK_SIZE=500
-ANOMALY_THRESHOLD=0.3
+CHUNK_SIZE= _
 
-# Optional: Override default settings
-# LOG_LEVEL=INFO
-# BATCH_SIZE=5

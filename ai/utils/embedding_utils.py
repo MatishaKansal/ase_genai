@@ -1,14 +1,11 @@
 from typing import List
-from google.cloud import aiplatform
+from ..config import EMBEDDING_MODEL, CHUNK_SIZE, PROJECT_ID, LOCATION
+import vertexai
+from vertexai.language_models import TextEmbeddingModel
 
-try:
-    from ..config import PROJECT_ID, LOCATION, EMBEDDING_MODEL, CHUNK_SIZE
-except ImportError:
-    from config import PROJECT_ID, LOCATION, EMBEDDING_MODEL, CHUNK_SIZE
-
-def chunk_text(text: str, chunk_size: int = None) -> List[str]:
+def chunk_text(text: str, chunk_size: int = 0) -> List[str]:
     """Split text into chunks of specified size"""
-    if chunk_size is None:
+    if chunk_size == 0:
         chunk_size = CHUNK_SIZE
     
     words = text.split()
@@ -20,13 +17,17 @@ def chunk_text(text: str, chunk_size: int = None) -> List[str]:
     return chunks
 
 def get_embeddings(chunks: List[str]) -> List[List[float]]:
-    """Generate embeddings for text chunks using Vertex AI"""
-    aiplatform.init(project=PROJECT_ID, location=LOCATION)
-    embed_model = aiplatform.TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
-    
-    embeddings = []
-    for chunk in chunks:
-        result = embed_model.get_embeddings([chunk])
-        embeddings.append(result[0].values)
-    
-    return embeddings
+    """Generate embeddings via Vertex AI SDK using ADC (service account)."""
+    vertexai.init(project=PROJECT_ID, location=LOCATION)
+    model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
+    # Filter out empty strings to avoid unnecessary calls
+    inputs = [c if c is not None else "" for c in chunks]
+    results = model.get_embeddings(texts=inputs)  # type: ignore[arg-type]
+    return [r.values for r in results]
+
+def get_embedding_for_query(text: str) -> List[float]:
+    """Generate a single embedding via Vertex AI SDK using ADC."""
+    vertexai.init(project=PROJECT_ID, location=LOCATION)
+    model = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
+    result = model.get_embeddings(texts=[text or ""])  # type: ignore[arg-type]
+    return result[0].values

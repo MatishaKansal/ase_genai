@@ -3,4 +3,15 @@
 /backend/.env
 
 /frontend/node_modules
-
+/.venv
+/.env
+# Python caches and compiled files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyd
+# Google Cloud service account keys (never commit secrets)
+ai/gcloud_key.json
+*.json.key
+*service-account*.json
+*gcloud*key*.json
