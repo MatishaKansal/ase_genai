@@ -1,22 +1,35 @@
 from google.cloud import documentai_v1 as documentai
+from google.cloud import vision
 
-try:
-    from ..config import PROJECT_ID, LOCATION, PROCESSOR_ID
-except ImportError:
-    from config import PROJECT_ID, LOCATION, PROCESSOR_ID
+# Assuming these are correctly imported from your config.py
+from ..config import PROJECT_ID, DOCAI_LOCATION, PROCESSOR_ID
 
-def extract_text_from_document(file_path: str) -> str:
-    """Extract text from a PDF document using Google Cloud Document AI"""
+def extract_text_from_document(file_bytes: bytes) -> str:
+    """Alias wrapper to process PDFs; maintained for compatibility with callers."""
+    # Document AI is used primarily for PDFs and similar docs
+    return extract_text_from_pdf(file_bytes)
+
+def extract_text_from_pdf(file_bytes: bytes) -> str:
+    """Extract text from a PDF using Google Cloud Document AI."""
     client = documentai.DocumentProcessorServiceClient()
-    name = client.processor_path(PROJECT_ID, LOCATION, PROCESSOR_ID)
+    name = client.processor_path(PROJECT_ID, DOCAI_LOCATION, PROCESSOR_ID)
     
-    with open(file_path, "rb") as f:
-        raw_document = documentai.RawDocument(
-            content=f.read(), 
-            mime_type="application/pdf"
-        )
+    raw_document = documentai.RawDocument(
+        content=file_bytes, 
+        mime_type="application/pdf"
+    )
     
     request = documentai.ProcessRequest(name=name, raw_document=raw_document)
     result = client.process_document(request=request)
     
     return result.document.text.strip()
+
+def extract_text_from_image(file_bytes: bytes) -> str:
+    """Extract text from an image using Google Cloud Vision API."""
+    client = vision.ImageAnnotatorClient()
+    image = vision.Image(content=file_bytes)
+    
+    # Use DOCUMENT_TEXT_DETECTION for dense text, like in a document image
+    response = client.document_text_detection(image=image)  # type: ignore[attr-defined]
+    
+    return response.full_text_annotation.text.strip()

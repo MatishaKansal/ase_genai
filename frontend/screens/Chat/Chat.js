@@ -1,11 +1,14 @@
-
-
 import React, { useState } from "react";
-import { View, TextInput, Text, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, ScrollView, StyleSheet, Image } from "react-native";
+import {
+  View, TextInput, Text, TouchableOpacity,
+  KeyboardAvoidingView, Platform, Keyboard,
+  TouchableWithoutFeedback, ScrollView, Image
+} from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import styles from "./ChatStyles";
 import Header from "../../components/Header";
 import * as DocumentPicker from "expo-document-picker";
+import { useRoute, useFocusEffect } from "@react-navigation/native";
+import styles from "./ChatStyles"; // keep your existing ChatStyles
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
@@ -16,12 +19,25 @@ if (Platform.OS !== "web") {
 }
 
 export default function Chat() {
+  const route = useRoute();
   const [inputValue, setInputValue] = useState("");
-  const [isBottom, setIsBottom] = useState(false); // track position 
-  const [inputHeight, setInputHeight] = useState(40); // ~1 line 
-  const [scrollEnabled, setScrollEnabled] = useState(false);
-  const [prevLen, setPrevLen] = useState(0);
   const [files, setFiles] = useState([]);
+  const [isBottom, setIsBottom] = useState(false);
+
+  // Add photo from CameraScreen if exists
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route.params?.photo) {
+        const newPhoto = {
+          uri: route.params.photo,
+          name: "photo.png",
+          mimeType: "image/png",
+        };
+        setFiles((prev) => [...prev, newPhoto]);
+        route.params.photo = null;
+      }
+    }, [route.params])
+  );
   const [messages, setMessages] = useState([]);
   const [notebookId, setNotebookId] = useState("");
   const [recognition, setRecognition] = useState(null); // State for Web Speech API
@@ -49,7 +65,7 @@ export default function Chat() {
         recognitionInstance.continuous = true;
         recognitionInstance.interimResults = false;
         recognitionInstance.lang = "en-US";
-        
+
         recognitionInstance.onstart = () => setIsRecording(true);
         recognitionInstance.onend = () => setIsRecording(false);
         recognitionInstance.onresult = (e) => {
@@ -141,16 +157,14 @@ export default function Chat() {
         setFiles((prev) => [...prev, ...result.assets]);
 
       } else if (result.type !== "cancel" && !result.assets) {
-        // Older versions of DocumentPicker
         setFiles((prev) => [...prev, result]);
       }
     } catch (err) {
       console.log("Error picking document:", err);
     }
   };
-  const removeFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+
+  const removeFile = (index) => setFiles((prev) => prev.filter((_, i) => i !== index));
 
 
   const handleSend = async () => {
@@ -198,31 +212,23 @@ export default function Chat() {
 
 
   return (
-    <TouchableWithoutFeedback
-      onPress={Platform.OS === "web" ? undefined : Keyboard.dismiss} accessible={false} >
-      <View style={styles.container}> {/* Header */}
+    <TouchableWithoutFeedback onPress={Platform.OS === "web" ? undefined : Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
         <Header />
 
         {/* Topbar */}
         <View style={styles.topbar}>
-          <TouchableOpacity
-            style={styles.topbarButton}
-            onPress={handleClear}>
-            <Text style={{ color: "black", fontWeight: "500", fontSize: "16" }}>
-              Clear Chat
-            </Text>
+          <TouchableOpacity style={styles.topbarButton} onPress={() => { setFiles([]); setInputValue(""); }}>
+            <Text style={{ color: "black", fontWeight: "500", fontSize: 16 }}>Clear Chat</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Main area with keyboard handling */}
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={10} // adjust for header height 
+          keyboardVerticalOffset={10}
         >
-
-          <View
-            style={styles.content}>
+          <View style={styles.content}>
             <ScrollView style={styles.chatArea}>
               {messages.map((msg, index) => (
                 <View
@@ -257,83 +263,89 @@ export default function Chat() {
                 </View>
               ))}
             </ScrollView>
+          </View>
 
 
 
-            {/* Search/Input bar */}
-            <View style={[styles.search, isBottom ?
-              { position: "absolute", bottom: 10, width: "100%" } :
-              { flex: 1, justifyContent: "center" },]} >
-              {/* Fixed bottom area */}
-              <View style={styles.bottomContainer}>
-                {/* File preview above the input */}
-                {files.length > 0 && (
-                  <ScrollView
-                    horizontal
-                    style={styles.previewContainer}
-                    showsHorizontalScrollIndicator={false}
-                  >
-                    {files.map((file, index) => (
-                      <View key={index} style={styles.fileBox}>
-                        {file.mimeType?.startsWith("image/") ? (
-                          <Image
-                            source={{ uri: file.uri }}
-                            style={{ width: 60, height: 60, borderRadius: 5 }}
-                          />
-                        ) : (
-                          <Text numberOfLines={1} style={styles.fileName}>
-                            {file.name}
-                          </Text>
-                        )}
-                        <TouchableOpacity
-                          style={styles.removeBtn}
-                          onPress={() => removeFile(index)}
-                        >
-                          <Text style={{ color: "white", fontSize: 12 }}>x</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </ScrollView>
-                )}
+          {/* Search/Input bar */}
+          <View style={[styles.search, isBottom ?
+            { position: "absolute", bottom: 10, width: "100%" } :
+            { flex: 1, justifyContent: "center" },]} >
+            {/* Fixed bottom area */}
+            <View style={styles.bottomContainer}>
+              {/* File preview above the input */}
+              {files.length > 0 && (
+                <ScrollView
+                  horizontal
+                  style={styles.previewContainer}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {files.map((file, index) => (
+                    <View key={index} style={styles.fileBox}>
+                      {file.mimeType?.startsWith("image/") ? (
+                        <Image
+                          source={{ uri: file.uri }}
+                          style={{ width: 60, height: 60, borderRadius: 5 }}
+                        />
+                      ) : (
+                        <Text numberOfLines={1} style={styles.fileName}>
+                          {file.name}
+                        </Text>
+                      )}
+                      <TouchableOpacity
+                        style={styles.removeBtn}
+                        onPress={() => removeFile(index)}
+                      >
+                        <Text style={{ color: "white", fontSize: 12 }}>x</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
 
-                {/* Input Row */}
-                <View style={styles.inner}>
-                  <TouchableOpacity style={styles.add} onPress={handleAdd}>
-                    <Text style={{ color: "black", fontSize: 24 }}>+</Text>
-                  </TouchableOpacity>
+              {/* Input Bar */}
+              <View style={[styles.search, isBottom ? { position: "absolute", bottom: 10, width: "100%" } : { flex: 1, justifyContent: "center" }]}>
+                <View style={styles.bottomContainer}>
+                  <View style={styles.inner}>
+                    <TouchableOpacity style={styles.add} onPress={handleAdd}>
+                      <Text style={{ color: "black", fontSize: 24 }}>+</Text>
+                    </TouchableOpacity>
 
-                  <TextInput
-                    style={styles.textarea}
-                    value={inputValue}
-                    onChangeText={setInputValue}
-                    placeholder="Type a message..."
-                    placeholderTextColor="black"
-                    multiline
-                  />
+                    <TextInput
+                      style={styles.textarea}
+                      value={inputValue}
+                      onChangeText={setInputValue}
+                      placeholder="Type a message..."
+                      placeholderTextColor="black"
+                      multiline
+                    />
 
-                  <TouchableOpacity
-                    style={styles.switch}
-                    onPress={inputValue || files.length > 0 ? handleSend : handleMic}
-                    disabled={
-                      !(Platform.OS === 'web' ? recognition : Voice) ||
-                      (!inputValue.trim() && files.length === 0 && !isRecording)
-                    }
-                  >
-                    {inputValue || files.length > 0 ? (
-                      <FontAwesome name="send" size={22} color="black" />
-                    ) : (
-                      <FontAwesome
-                        name={isRecording ? "stop-circle" : "microphone"}
-                        size={24}
-                        color={isRecording ? "red" : "black"}
-                      />
-                    )}
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.switch}
+                      onPress={inputValue || files.length > 0 ? handleSend : handleMic}
+                      disabled={
+                        !(Platform.OS === 'web' ? recognition : Voice) ||
+                        (!inputValue.trim() && files.length === 0 && !isRecording)
+                      }
+                    >
+                      {inputValue || files.length > 0 ? (
+                        <FontAwesome name="send" size={22} color="black" />
+                      ) : (
+                        <FontAwesome
+                          name={isRecording ? "stop-circle" : "microphone"}
+                          size={24}
+                          color={isRecording ? "red" : "black"}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
           </View>
+
         </KeyboardAvoidingView>
-      </View >
-    </TouchableWithoutFeedback >);
+      </View>
+    </TouchableWithoutFeedback>
+  );
 }

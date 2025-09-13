@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Platform, Image, AppState } from "react-native";
 import { Camera } from "expo-camera";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 export default function CameraScreen() {
+  const navigation = useNavigation();
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [photoUri, setPhotoUri] = useState(null);
@@ -12,85 +13,92 @@ export default function CameraScreen() {
   const mediaStreamRef = useRef(null);
   const appState = useRef(AppState.currentState);
 
-  // ✅ App background par camera off
+  // Handle app background
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (appState.current === "active" && nextAppState.match(/inactive|background/)) {
-        if (Platform.OS === "web" && mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-          mediaStreamRef.current = null;
-        }
-        if (cameraRef.current) {
-          cameraRef.current.pausePreview?.();
-        }
+        stopCamera();
       }
       appState.current = nextAppState;
     });
-
     return () => subscription.remove();
   }, []);
 
-  // ✅ Screen switch hone par bhi camera off
+  const startCamera = async () => {
+    if (Platform.OS === "web") {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        mediaStreamRef.current = stream;
+        if (videoRef.current) videoRef.current.srcObject = stream;
+        setHasPermission(true);
+      } catch {
+        setHasPermission(false);
+      }
+    } else {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === "granted");
+    }
+  };
+
+  const stopCamera = () => {
+    if (Platform.OS === "web" && mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+    if (cameraRef.current) cameraRef.current.pausePreview?.();
+  };
+
+  // Request permission on mount
+  useEffect(() => {
+    if (hasPermission === null) startCamera();
+  }, []);
+
+  // Resume camera when screen gains focus
   useFocusEffect(
     React.useCallback(() => {
-      const activateCamera = async () => {
-        if (Platform.OS === "web") {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            mediaStreamRef.current = stream;
-            if (videoRef.current) videoRef.current.srcObject = stream;
-            setHasPermission(true);
-          } catch {
-            setHasPermission(false);
-          }
-        } else {
-          const { status } = await Camera.requestCameraPermissionsAsync();
-          setHasPermission(status === "granted");
+      if (hasPermission) {
+        if (Platform.OS === "web" && !mediaStreamRef.current) {
+          startCamera();
+        } else if (Platform.OS !== "web" && cameraRef.current && !photoUri) {
+          cameraRef.current.resumePreview?.();
         }
-      };
-
-      activateCamera();
-
-      return () => {
-        if (Platform.OS === "web" && mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-          mediaStreamRef.current = null;
-        }
-        if (cameraRef.current) {
-          cameraRef.current.pausePreview?.();
-        }
-      };
-    }, [])
+      }
+      return () => stopCamera();
+    }, [hasPermission, photoUri])
   );
 
-  if (hasPermission === null) {
+  if (hasPermission === null)
     return <View style={styles.center}><Text>Requesting camera permission...</Text></View>;
-  }
 
-  if (hasPermission === false) {
+  if (hasPermission === false)
     return <View style={styles.center}><Text>No access to camera</Text></View>;
-  }
 
-  // ✅ Photo preview
+  // Photo preview screen
   if (photoUri) {
     return (
       <View style={styles.previewContainer}>
         <Image source={{ uri: photoUri }} style={styles.previewImage} />
-
-        {/* Done button */}
-        <TouchableOpacity style={styles.doneButton} onPress={() => console.log("✅ Photo confirmed:", photoUri)}>
+        <TouchableOpacity
+          style={styles.doneButton}
+          onPress={() => {
+            navigation.navigate("Chat", { photo: photoUri });
+            setPhotoUri(null);
+          }}
+        >
           <Text style={styles.doneText}>Done</Text>
         </TouchableOpacity>
 
-        {/* Retake button */}
-        <TouchableOpacity style={styles.retakeButton} onPress={() => setPhotoUri(null)}>
+        <TouchableOpacity
+          style={styles.retakeButton}
+          onPress={() => setPhotoUri(null)}
+        >
           <Text style={styles.retakeText}>Retake</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  // ✅ Camera with working capture button
+  // Camera screen
   return (
     <View style={styles.container}>
       {Platform.OS === "web" ? (
@@ -104,21 +112,17 @@ export default function CameraScreen() {
         />
       )}
 
-      {/* 🔘 Capture button */}
       <TouchableOpacity
         style={styles.floatingButton}
         onPress={async () => {
           if (Platform.OS === "web" && videoRef.current) {
-            // ✅ Web photo capture using canvas
             const canvas = document.createElement("canvas");
             canvas.width = videoRef.current.videoWidth;
             canvas.height = videoRef.current.videoHeight;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL("image/png");
-            setPhotoUri(dataUrl);
+            setPhotoUri(canvas.toDataURL("image/png"));
           } else if (cameraRef.current && cameraReady) {
-            // ✅ Native photo capture
             const photo = await cameraRef.current.takePictureAsync();
             setPhotoUri(photo.uri);
           }
@@ -136,7 +140,7 @@ const styles = StyleSheet.create({
 
   floatingButton: {
     position: "absolute",
-    bottom: 80, // 👈 Tab bar ke upar
+    bottom: 80,
     alignSelf: "center",
     width: 70,
     height: 70,

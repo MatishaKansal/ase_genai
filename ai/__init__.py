@@ -1,7 +1,7 @@
-"""
-AI Module for Document Processing and Analysis
+"""Thin wrapper to expose the main FastAPI app.
+
+This module re-exports the app and app_state from ai/init.py to avoid
+duplicated startup logic and ensure there's a single source of truth.
 """
 
-__version__ = "1.0.0"
-__author__ = "Your Name"
-__description__ = "AI-powered document processing with OCR, embeddings, and anomaly detection"
+from .init import app, app_state  # noqa: F401
