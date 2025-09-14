@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#DCF8C6",
+    backgroundColor: "#cfe1fc",
   },
   botBubble: {
     alignSelf: "flex-start",
