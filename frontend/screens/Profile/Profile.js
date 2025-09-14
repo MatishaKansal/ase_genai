@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,17 +8,15 @@ import {
   Dimensions,
   SafeAreaView,
   TouchableOpacity,
-  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import styles from "./ProfileStyles";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
 
 const baseUrl = "http://localhost:5000";
-
 
 const { height, width } = Dimensions.get("window");
 
@@ -30,51 +28,37 @@ const Profile = () => {
 
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const user = await AsyncStorage.getItem("user");
-        if (!user) return;
+  const fetchData = async () => {
+    try {
+      const user = await AsyncStorage.getItem("user");
+      if (!user) return;
 
-    const parsedUser = JSON.parse(user);
+      const parsedUser = JSON.parse(user);
+      setUserData(parsedUser);
 
-    const { userId } = parsedUser; 
+      const { userId } = parsedUser;
 
-        // Dummy data for now
-        //     setInfo([
-        //       { title: "Chat 1 gggggggggggg", preview: "Some chat history text ..." },
-        //       { title: "Chat 2", preview: "More chat history here" },
-        //       { title: "Chat 3", preview: "More chat history here" },
-        //       { title: "Chat 4", preview: "More chat history here" },
-        //       { title: "Chat 5", preview: "More chat history here" },
-        //       { title: "Chat 6", preview: "More chat history here" },
-        //       { title: "Chat 7", preview: "More chat history here" },
-        //       { title: "Chat 8", preview: "More chat history here" },
-        //     ]);
-        //   } catch (err) {
-        //     console.log("Error:", err);
-        //   }
-        // };
-        // fetchData();
-        const res = await axios.get(`${baseUrl}/api/chat/${userId}`);
-        
-        console.log("Notebooks data:", res.data);
-        setInfo(res.data);
-      } catch (err) {
-        console.log("Error fetching notebooks:", err.message);
-      }
-    };
+      const res = await axios.get(`${baseUrl}/api/chat/${userId}`);
 
-    fetchData();
-  }, []);
+      console.log("Notebooks data:", res.data);
+      setInfo(res.data);
+    } catch (err) {
+      console.log("Error fetching notebooks:", err.message);
+    }
+  };
 
+  // ✅ useFocusEffect se har tab change pe refresh hoga
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.multiRemove(["token", "user"]);
+      await AsyncStorage.clear();
       console.log("Logged out successfully");
 
-      // 👇 pura stack reset hoga aur Home pe redirect karega
       navigation.reset({
         index: 0,
         routes: [{ name: "Home" }],
@@ -84,32 +68,9 @@ const Profile = () => {
     }
   };
 
-
   return (
     <View style={styles.container}>
-
-      {/* Full-screen overlay: shown only when dropdownOpen.
-          It catches taps anywhere and closes the dropdown.
-          overlay zIndex must be lower than dropdown's zIndex so dropdown is clickable. */}
-      {dropdownOpen && (
-        <Pressable
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            // semi-transparent background helps debugging; set to 'transparent' if you prefer
-            backgroundColor: "rgba(0,0,0,0.0)",
-            zIndex: 1,
-          }}
-          onPress={() => setDropdownOpen(false)}
-        />
-      )}
-
-
       <SafeAreaView style={{ backgroundColor: "#1f2937" }}>
-        {/* Header Section */}
         <View style={styles.top}>
           <View style={styles.profile}>
             <Image
@@ -122,50 +83,11 @@ const Profile = () => {
           </View>
 
           <View style={styles.settings_container}>
-            <TouchableOpacity onPress={(e) => {
-              e.stopPropagation();
-              setDropdownOpen(!dropdownOpen);
-            }}>
-              <Ionicons name="settings-outline" size={34} color="white" />
+            <TouchableOpacity onPress={handleLogout}>
+              <Text style={{ color: "#F59E0B", fontSize: 20, fontWeight: "700" }}>
+                Logout
+              </Text>
             </TouchableOpacity>
-
-            {dropdownOpen && (
-              <View style={styles.dropdown}>
-                {/* Edit Profile */}
-                <TouchableOpacity
-                  onPress={() => console.log("Edit Profile pressed")}
-                  style={[
-                    styles.dropdown_item,
-                    Platform.OS === "web" ? { cursor: "pointer" } : {},
-                  ]}
-                >
-                  <Text style={styles.dropdown_text}>Edit Profile</Text>
-                </TouchableOpacity>
-
-                {/* Change Password */}
-                <TouchableOpacity
-                  onPress={() => console.log("Change Password pressed")}
-                  style={[
-                    styles.dropdown_item,
-                    Platform.OS === "web" ? { cursor: "pointer" } : {},
-                  ]}
-                >
-                  <Text style={styles.dropdown_text}>Change Password</Text>
-                </TouchableOpacity>
-
-                {/* Logout with borderTop as divider */}
-                <TouchableOpacity
-                  onPress={handleLogout}
-                  style={[
-                    styles.dropdown_item,
-                    { borderTopWidth: 1, borderTopColor: "#c8c6c6" },
-                    Platform.OS === "web" ? { cursor: "pointer" } : {},
-                  ]}
-                >
-                  <Text style={styles.dropdown_text}>Logout</Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </View>
         </View>
       </SafeAreaView>
@@ -180,21 +102,25 @@ const Profile = () => {
           <FlatList
             data={info}
             keyExtractor={(item, index) => index.toString()}
-            numColumns={Platform.OS === "web" ? 3 : 1} // 3 per row on web, 1 per row on mobile
-            showsVerticalScrollIndicator={true} // 👈 scroll bar dikhane ke liye
+            numColumns={Platform.OS === "web" ? 3 : 1}
+            showsVerticalScrollIndicator={true}
             contentContainerStyle={[
               styles.historySection,
-              { paddingBottom: 100 }, // tab navigator ke liye space
+              { paddingBottom: 100 },
             ]}
             style={[styles.flat_list, { flex: 1 }]}
             renderItem={({ item, index }) => (
-              <View
+              <TouchableOpacity
                 style={[
                   styles.historyCard,
                   Platform.OS === "web" &&
-                  hoverIndex === index &&
-                  styles.historyCardHovered,
+                    hoverIndex === index &&
+                    styles.historyCardHovered,
                 ]}
+                onPress={() => 
+                  // console.log(item.notebookId)
+                  navigation.navigate("Chat", { notebookId: item.notebookId })
+                }
                 onMouseEnter={() =>
                   Platform.OS === "web" && setHoverIndex(index)
                 }
@@ -227,7 +153,7 @@ const Profile = () => {
                 >
                   {item.preview}
                 </Text>
-              </View>
+              </TouchableOpacity>
             )}
           />
         )}
