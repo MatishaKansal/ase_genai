@@ -5,40 +5,43 @@ const { height, width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   chatArea: {
     flex: 1,
-    padding: 10
+    padding: 10,
+    width: "55%",
+    alignSelf: "center",
+    backgroundColor: "transparent",
   },
   messageBubble: {
     marginVertical: 5,
     padding: 10,
     borderRadius: 10,
-    maxWidth: "70%"
+    maxWidth: "80%",
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#DCF8C6"
+    backgroundColor: "#DCF8C6",
   },
   botBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#EAEAEA"
+    backgroundColor: "#EAEAEA",
   },
   messageText: {
     fontSize: 16,
-    color: "black"
+    color: "black",
   },
   fileContainer: {
     marginTop: 5,
     padding: 5,
     backgroundColor: "#ddd",
-    borderRadius: 5
+    borderRadius: 5,
   },
   fileLink: {
     color: "blue",
-    textDecorationLine: "underline"
+    textDecorationLine: "underline",
   },
   fileImage: {
     width: 120,
     height: 120,
-    borderRadius: 8
+    borderRadius: 8,
   },
   container: {
     flex: 1,
@@ -46,9 +49,8 @@ const styles = StyleSheet.create({
     width: width,
   },
   content: {
-    flex: 1,                
-    justifyContent: "center", 
-    alignItems: "center",    
+    flex: 1,
+    alignItems: "center",
   },
   topbar: {
     width: "100%",
@@ -57,7 +59,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "flex-end",
     paddingRight: 10,
-    // borderRadius: 20,
   },
   topbarButton: {
     height: 50,
@@ -70,16 +71,12 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     width: "100%",
-    borderTopWidth: 1,
     borderColor: "#ddd",
     paddingBottom: 5,
     alignSelf: "center",
-    width: "100%",
-
     justifyContent: "center",
     alignItems: "center",
   },
-
   previewContainer: {
     flexDirection: "row",
     padding: 5,
@@ -92,17 +89,14 @@ const styles = StyleSheet.create({
     position: "relative",
     backgroundColor: "#f1f1f1",
     padding: 5,
-    marginRight: 8,
     borderRadius: 5,
     minWidth: 80,
     maxWidth: 120,
     alignItems: "center",
     justifyContent: "center",
-    position: "relative",
     borderWidth: 1,
     borderColor: "#ddd",
   },
-
   removeBtn: {
     position: "absolute",
     top: -5,
@@ -115,21 +109,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "black",
   },
-  chatArea: {
-    flex: 1,
-    backgroundColor: "white",
-  },
   search: {
-    // borderWidth:2,
     alignSelf: "center",
     width: "100%",
-
     justifyContent: "center",
     alignItems: "center",
-
   },
   inner: {
-    // backgroundColor: "#667579",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -137,23 +123,18 @@ const styles = StyleSheet.create({
     maxWidth: 1000,
     padding: 5,
     borderRadius: 10,
-
   },
   textarea: {
     flex: 1,
-    // minHeight: 20,  
-    // 1-line starting height
-    // no fixed height here; we control via inline {height: inputHeight}
     backgroundColor: "#d1d5db",
     color: "black",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 5,
     fontSize: 16,
-    lineHeight: 25,         // helps keep line calc stable
+    lineHeight: 25,
     textAlignVertical: "top",
   },
-
   switch: {
     marginLeft: 5,
     justifyContent: "center",

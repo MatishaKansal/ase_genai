@@ -7,7 +7,7 @@ import { useWindowDimensions } from "react-native";
 import styles from "./LoginStyles";
 import Header from "../../components/Header";
 
-const baseUrl = "https://4ca393730fae.ngrok-free.app";
+const baseUrl = "http://localhost:5000";
 
 export default function Login() {
   const { width } = useWindowDimensions();
@@ -33,19 +33,17 @@ export default function Login() {
       const response = await axios.post(`${baseUrl}/auth/login`, formData);
       console.log("Full response:", response.data);
 
-      const token = response.data?.token;
-      if (token) {
-        // store token + user in AsyncStorage
+      const { token, user } = response.data;
+
+      if (token && user) {
         await AsyncStorage.setItem("token", token);
-        if (response.data.user) {
-          await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-        }
+        await AsyncStorage.setItem("user", JSON.stringify(user));
 
         Alert.alert("Success", "Login successful!");
         setMessage("");
-        navigation.navigate("ChatTabs"); // 👈 change to your main screen name
+        navigation.navigate("ChatTabs");
       } else {
-        Alert.alert("Error", "Login failed: Token not received");
+        Alert.alert("Error", "Login failed: Token or user data missing");
       }
     } catch (error) {
       console.error(error.response?.data || "Login failed");
@@ -53,6 +51,7 @@ export default function Login() {
       Alert.alert("Error", "Login failed. Please try again.");
     }
   };
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -86,7 +85,7 @@ export default function Login() {
 
           <TouchableOpacity style={styles.signUpButton}
             // onPress={() => navigation.navigate("ChatTabs")} 
-          onPress={handleSubmit}
+            onPress={handleSubmit}
           >
             <Text style={styles.signUpText}>Login</Text>
           </TouchableOpacity>

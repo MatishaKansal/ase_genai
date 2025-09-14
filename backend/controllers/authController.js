@@ -57,14 +57,16 @@ const signup = async (req, resp) => {
 
         if (user) {
             resp.status(201).json({
+                message: 'User created successfully',
+                token: generateToken(user._id),
                 user: {
                     userId: user._id,
                     email: user.email,
                     userName: user.userName,
                     profilePic: user.profilePic
                 },
-                token: generateToken(user._id),
-                message: 'User created successfully'
+                
+                
             });
         } else {
             resp.status(400).json({ message: 'Invalid user data' });

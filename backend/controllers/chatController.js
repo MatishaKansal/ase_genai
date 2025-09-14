@@ -20,24 +20,23 @@ const postChat = async (req, resp) => {
             }
         }
 
-        // If files exist, convert them into message objects
+
+        // If files exist, add the file info to the user's message object
         if (req.files && req.files.length > 0) {
-            const fileMessages = req.files.map(file => ({
-                sender: "user",
-                message: "",
-                file: {
-                    fileName: file.originalname,
-                    fileType: file.mimetype,
-                    fileUrl: `/uploads/${file.filename}`
-                }
-            }));
-
-            messages = messages ? [...messages, ...fileMessages] : fileMessages;
-        }
-
-        // Validate messages array
-        if (!messages || !Array.isArray(messages)) {
-            return resp.status(400).json({ error: "Messages should be an array" });
+            const file = req.files[0];
+            // Assuming only one file per message for simplicity based on your schema.
+            userMessage.file = {
+                fileName: file.originalname,
+                fileType: file.mimetype,
+                fileUrl: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+            };
+            // Clear the message if it was a file-only message
+            if (!userMessage.message) {
+                userMessage.message = "";
+            }
+        } else {
+            // Ensure file is null if no file was uploaded
+            userMessage.file = null;
         }
 
         // Save or update chat
@@ -73,16 +72,12 @@ const getChat = async (req, resp) => {
 const getAllNotebooks = async (req, resp) => {
     try {
         const { userId } = req.params;
-        const notebooks = await Chat.find({ userId })
+        const notebooks = await Chat.find({ userId }).sort({ updatedAt: -1 });
 
         const formatted = notebooks.map(chat => ({
             notebookId: chat.notebookId,
-            title: chat.messages.length > 0
-                ? chat.messages[0].message.slice(0, 30) // first message as title
-                : "Untitled Notebook",
-            preview: chat.messages.length > 0
-                ? chat.messages[chat.messages.length - 1].message.slice(0, 40) // last message as preview
-                : "",
+            title: chat.messages[0]?.message?.slice(0, 30).trim() || "Untitled Notebook",
+            preview: chat.messages[chat.messages.length - 1]?.message?.slice(0, 40).trim() || "",
             messageCount: chat.messages.length
         }));
 

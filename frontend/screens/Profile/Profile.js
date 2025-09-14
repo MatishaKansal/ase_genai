@@ -15,6 +15,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import styles from "./ProfileStyles";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+
+const baseUrl = "http://localhost:5000";
+
 
 const { height, width } = Dimensions.get("window");
 
@@ -30,36 +34,38 @@ const Profile = () => {
     const fetchData = async () => {
       try {
         const user = await AsyncStorage.getItem("user");
-        if (user) setUserData(JSON.parse(user));
-        const { userId } = JSON.parse(user);
+        if (!user) return;
+
+    const parsedUser = JSON.parse(user);
+
+    const { userId } = parsedUser; 
 
         // Dummy data for now
-        setInfo([
-          { heading: "Chat 1 gggggggggggg", data: "Some chat history text ..." },
-          { title: "Chat 2", preview: "More chat history here" },
-          { title: "Chat 3", preview: "More chat history here" },
-          { title: "Chat 4", preview: "More chat history here" },
-          { title: "Chat 5", preview: "More chat history here" },
-          { title: "Chat 6", preview: "More chat history here" },
-          { title: "Chat 7", preview: "More chat history here" },
-          { title: "Chat 8", preview: "More chat history here" },
-        ]);
+        //     setInfo([
+        //       { title: "Chat 1 gggggggggggg", preview: "Some chat history text ..." },
+        //       { title: "Chat 2", preview: "More chat history here" },
+        //       { title: "Chat 3", preview: "More chat history here" },
+        //       { title: "Chat 4", preview: "More chat history here" },
+        //       { title: "Chat 5", preview: "More chat history here" },
+        //       { title: "Chat 6", preview: "More chat history here" },
+        //       { title: "Chat 7", preview: "More chat history here" },
+        //       { title: "Chat 8", preview: "More chat history here" },
+        //     ]);
+        //   } catch (err) {
+        //     console.log("Error:", err);
+        //   }
+        // };
+        // fetchData();
+        const res = await axios.get(`${baseUrl}/api/chat/${userId}`);
+        
+        console.log("Notebooks data:", res.data);
+        setInfo(res.data);
       } catch (err) {
-        console.log("Error:", err);
+        console.log("Error fetching notebooks:", err.message);
       }
     };
+
     fetchData();
-
-    // const fetchNotebooks = async () => {
-    //   try {
-    //     const res = await axios.get(`/api/chat/${userId}`);
-    //     setInfo(res.data);
-    //   } catch (err) {
-    //     console.log("Error fetching notebooks:", err.message);
-    //   }
-    // };
-
-    // fetchNotebooks();
   }, []);
 
 

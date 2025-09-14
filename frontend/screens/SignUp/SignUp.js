@@ -7,7 +7,7 @@ import { useWindowDimensions } from "react-native";
 import styles from "./SignUpStyles";
 import Header from "../../components/Header";
 
-const baseUrl = "https://4ca393730fae.ngrok-free.app";
+const baseUrl = "http://localhost:5000";
 
 export default function SignUp() {
   const { width } = useWindowDimensions();
