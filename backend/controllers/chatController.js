@@ -1,15 +1,20 @@
 const Chat = require("../models/chatModel.js");
 const { v4: uuidv4 } = require("uuid");
-const path = require("path");
-const fs = require("fs");
 
 // POST Chat
 const postChat = async (req, resp) => {
   try {
     const { userId } = req.params;
-    let { notebookId, messages } = req.body;
+    let { notebookId, messages, language } = req.body;
 
-    // Parse messages if sent as string (from FormData)
+    const allowedLangs = ["en", "hi", "pu", "ta"];
+
+    // Validate request-level language
+    if (language && !allowedLangs.includes(language)) {
+      return resp.status(400).json({ error: "Invalid language" });
+    }
+
+    // Parse messages if sent as string
     if (typeof messages === "string") {
       try {
         messages = JSON.parse(messages);
@@ -18,12 +23,13 @@ const postChat = async (req, resp) => {
       }
     }
 
-    // Generate notebookId if it's a new chat
-    if (!notebookId) {
-      notebookId = uuidv4();
-    }
+    // Ensure messages is an array
+    if (!Array.isArray(messages)) messages = [];
 
-    // Attach uploaded file info to messages
+    // Generate notebookId if new chat
+    if (!notebookId) notebookId = uuidv4();
+
+    // Attach uploaded files
     if (req.files && req.files.length > 0) {
       req.files.forEach((file, index) => {
         if (messages[index]) {
@@ -35,15 +41,24 @@ const postChat = async (req, resp) => {
           if (!messages[index].message) messages[index].message = "";
         }
       });
-    } else if (messages && messages.length > 0) {
+    } else {
       messages.forEach((msg) => {
         if (!msg.file) msg.file = null;
       });
     }
 
-    // Save or update chat
-    let chat = await Chat.findOne({ userId, notebookId });
+    // Ensure each message has sender and language
+    messages = messages.map((msg) => ({
+      sender: msg.sender || "user",
+      message: msg.message || "",
+      language: msg.language && allowedLangs.includes(msg.language)
+        ? msg.language
+        : (language || "en"),
+      file: msg.file || null,
+    }));
 
+    // Find or create chat
+    let chat = await Chat.findOne({ userId, notebookId });
     if (!chat) {
       chat = new Chat({ userId, notebookId, messages: [] });
     }
@@ -51,19 +66,23 @@ const postChat = async (req, resp) => {
     // Push user messages
     chat.messages.push(...messages);
 
-    // ✅ Add basic bot auto-reply (static for now)
+    // Bot auto-reply in last message language
+    const lastUserLang = messages.length > 0
+      ? messages[messages.length - 1].language
+      : (language || "en");
+
     chat.messages.push({
       sender: "bot",
-      message: "Got your message 👍. LegalMitra is here to help!",
+      message: `Got your message 👍. LegalMitra is here to help! (Language: ${lastUserLang})`,
+      language: lastUserLang,
       file: null,
-      timestamp: new Date(),
     });
 
     await chat.save();
 
     resp.status(200).json({
       notebookId: chat.notebookId,
-      messages: Array.isArray(chat.messages) ? chat.messages : [],
+      messages: chat.messages,
     });
   } catch (error) {
     resp.status(500).json({ error: error.message });
