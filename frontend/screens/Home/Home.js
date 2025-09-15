@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   Pressable,
+  Image
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import styles from "./HomeStyles";
@@ -43,15 +44,23 @@ export default function Home() {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {/* Navbar */}
-        <View style={styles.navbar}>
-          <Text style={styles.logo}>LOGO</Text>
-          <TouchableOpacity
-            style={styles.loginButton}
-            onPress={() => navigation.navigate("Login")}
-          >
-            <Text style={styles.loginText}>Login / Sign Up</Text>
-          </TouchableOpacity>
+      <View style={styles.navbar}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.headerTitle}>LegalMitra</Text>
         </View>
+
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={styles.loginText}>Login / Sign Up</Text>
+        </TouchableOpacity>
+      </View>
 
         {/* Hero Section */}
         <Text style={styles.heroTitle}>
