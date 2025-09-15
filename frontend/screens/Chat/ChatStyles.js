@@ -109,6 +109,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "black",
   },
+  dropdown:{
+    height: 62,
+    borderRadius: 5,
+    marginLeft: 1,
+    backgroundColor: "#d1d5db",
+    borderWidth:0, 
+   },
   search: {
     alignSelf: "center",
     width: "100%",

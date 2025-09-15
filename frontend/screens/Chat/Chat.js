@@ -1,8 +1,16 @@
 import React, { useState, useCallback } from "react";
 import {
-  View, TextInput, Text, TouchableOpacity,
-  KeyboardAvoidingView, Platform, Keyboard,
-  TouchableWithoutFeedback, ScrollView, Image, Linking
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Image,
+  Linking
 } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
@@ -12,7 +20,7 @@ import styles from "./ChatStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Audio } from "expo-av";
-
+import { Picker } from "@react-native-picker/picker";
 
 const baseUrl = "http://localhost:5000";
 
@@ -21,10 +29,11 @@ export default function Chat() {
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [notebookId, setNotebookId] = useState(route.params?.notebookId || ""); // initial notebookId
+  const [notebookId, setNotebookId] = useState(route.params?.notebookId || "");
   const [sound, setSound] = useState(null);
+  const [selectedLang, setSelectedLang] = useState("en");
 
-  // ✅ Add photo from CameraScreen if exists
+  // Add photo from CameraScreen if exists
   useFocusEffect(
     useCallback(() => {
       if (route.params?.photo) {
@@ -39,7 +48,7 @@ export default function Chat() {
     }, [route.params])
   );
 
-  // ✅ Fetch chat messages
+  // Fetch chat messages
   const fetchChat = useCallback(async (id) => {
     try {
       const user = await AsyncStorage.getItem("user");
@@ -48,7 +57,6 @@ export default function Chat() {
         return;
       }
       const { userId } = JSON.parse(user);
-
       if (id) {
         const res = await axios.get(`${baseUrl}/api/chat/${userId}/${id}`);
         setMessages(Array.isArray(res.data.messages) ? res.data.messages : []);
@@ -62,7 +70,7 @@ export default function Chat() {
     }
   }, []);
 
-  // ✅ Update notebookId and fetch chat when route param changes
+  // Update notebookId and fetch chat
   useFocusEffect(
     useCallback(() => {
       if (route.params?.notebookId) {
@@ -95,25 +103,19 @@ export default function Chat() {
 
   const removeFile = (index) => setFiles((prev) => prev.filter((_, i) => i !== index));
 
-
   async function playAudio(url) {
     try {
-      if (sound) {
-        await sound.unloadAsync(); // pehle ka audio clear
-      }
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true }
-      );
+      if (sound) await sound.unloadAsync();
+      const { sound: newSound } = await Audio.Sound.createAsync({ uri: url }, { shouldPlay: true });
       setSound(newSound);
     } catch (error) {
       console.error("Error playing audio:", error);
     }
   }
+
   const handleSend = async () => {
     const user = await AsyncStorage.getItem("user");
     if (!user) return;
-
     const { userId } = JSON.parse(user);
     if (!inputValue.trim() && files.length === 0) return;
 
@@ -122,7 +124,8 @@ export default function Chat() {
       formData.append("userId", userId);
       formData.append("notebookId", notebookId);
 
-      const messagesToSend = [{ sender: "user", message: inputValue, file: null }];
+      // ✅ Include selected language per message
+      const messagesToSend = [{ sender: "user", message: inputValue, file: null, language: selectedLang }];
       formData.append("messages", JSON.stringify(messagesToSend));
 
       files.forEach((file) => {
@@ -138,7 +141,6 @@ export default function Chat() {
       });
 
       if (!notebookId) setNotebookId(res.data.notebookId);
-
       setMessages(Array.isArray(res.data.messages) ? res.data.messages : []);
       setInputValue("");
       setFiles([]);
@@ -157,57 +159,31 @@ export default function Chat() {
           </TouchableOpacity>
         </View>
 
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={10}
-        >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={10}>
           <View style={styles.content}>
             <ScrollView style={styles.chatArea}>
               {messages.map((msg, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.messageBubble,
-                    msg.sender === "user" ? styles.userBubble : styles.botBubble,
-                  ]}
-                >
-                  {/* Message text */}
-                  {msg.message ? (
-                    <Text style={styles.messageText}>{msg.message}</Text>
-                  ) : null}
+                <View key={index} style={[styles.messageBubble, msg.sender === "user" ? styles.userBubble : styles.botBubble]}>
+                  {msg.message && <Text style={styles.messageText}>{msg.message}</Text>}
 
-                  {/* File handling */}
                   {msg.file && (
-                    <TouchableOpacity
-                      onPress={() => Linking.openURL(msg.file.fileUrl)}
-                      style={styles.fileContainer}
-                    >
+                    <TouchableOpacity onPress={() => Linking.openURL(msg.file.fileUrl)} style={styles.fileContainer}>
                       {msg.file.fileType.startsWith("image/") ? (
-                        <Image
-                          source={{ uri: msg.file.fileUrl }}
-                          style={styles.fileImage}
-                          resizeMode="cover"
-                        />
+                        <Image source={{ uri: msg.file.fileUrl }} style={styles.fileImage} resizeMode="cover" />
                       ) : (
                         <Text style={styles.fileLink}>{msg.file.fileName}</Text>
                       )}
                     </TouchableOpacity>
                   )}
 
-                  {/* Speaker button only for bot */}
-                  {msg.sender === "bot" && (
-                    <TouchableOpacity
-                      style={styles.speakerButton}
-                      onPress={() => playAudio(msg.audioUrl)}
-                    >
+                  {msg.sender === "bot" && msg.audioUrl && (
+                    <TouchableOpacity style={styles.speakerButton} onPress={() => playAudio(msg.audioUrl)}>
                       <Ionicons name="volume-high" size={20} color="#1f2937" />
                     </TouchableOpacity>
                   )}
                 </View>
               ))}
             </ScrollView>
-
           </View>
 
           <View style={styles.search}>
@@ -238,20 +214,29 @@ export default function Chat() {
                   style={styles.textarea}
                   value={inputValue}
                   onChangeText={setInputValue}
-                  placeholder="Type a message..."
+                  placeholder="Upload files and start asking questions..."
                   placeholderTextColor="black"
                   multiline
-                  blurOnSubmit={false} // Important to keep cursor in TextInput
+                  blurOnSubmit={false}
                   onKeyPress={({ nativeEvent }) => {
-                    if (nativeEvent.key === "Enter") {
-                      if (!nativeEvent.shiftKey) { // Enter without Shift -> Send
-                        handleSend();
-                      } else {
-                        setInputValue(prev => prev ); // Shift+Enter -> New line
-                      }
+                    if (nativeEvent.key === "Enter" && !nativeEvent.shiftKey) {
+                      handleSend();
                     }
                   }}
                 />
+
+                <View style={styles.dropdownWrapper}>
+                  <Picker
+                    selectedValue={selectedLang}
+                    style={styles.dropdown}
+                    onValueChange={(itemValue) => setSelectedLang(itemValue)}
+                  >
+                    <Picker.Item label="English" value="en" />
+                    <Picker.Item label="हिंदी" value="hi" />
+                    <Picker.Item label="ਪੰਜਾਬੀ" value="pu" />
+                    <Picker.Item label="தமிழ்" value="ta" />
+                  </Picker>
+                </View>
 
                 <TouchableOpacity
                   style={styles.switch}
