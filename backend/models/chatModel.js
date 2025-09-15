@@ -16,7 +16,7 @@ const chatSchema = new mongoose.Schema({
       },
     },
   ],
-});
+}, { timestamps: true });
 
 // optional: enforce unique notebook per user
 // chatSchema.index({ userId: 1, notebookId: 1 }, { unique: true });

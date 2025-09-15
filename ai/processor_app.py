@@ -23,14 +23,14 @@ try:
     from .utils.vectorstore_utils import search_vector_store
     from .utils.anomaly_utils import find_missing_clauses
 except ImportError:
-    from .init import app as fastapi_app, app_state
-    from utils.ocr_utils import extract_text_from_document, extract_text_from_image
-    from utils.embedding_utils import chunk_text, get_embeddings, get_embedding_for_query
-    from utils.summarizer_utils import generate_summary, generate_grounded_answer
-    from utils.translation_utils import translate_text
-    from utils.tts_utils import generate_audio
-    from utils.vectorstore_utils import search_vector_store
-    from utils.anomaly_utils import find_missing_clauses
+    from init import app as fastapi_app, app_state  # type: ignore
+    from utils.ocr_utils import extract_text_from_document, extract_text_from_image  # type: ignore
+    from utils.embedding_utils import chunk_text, get_embeddings, get_embedding_for_query  # type: ignore
+    from utils.summarizer_utils import generate_summary, generate_grounded_answer  # type: ignore
+    from utils.translation_utils import translate_text  # type: ignore
+    from utils.tts_utils import generate_audio  # type: ignore
+    from utils.vectorstore_utils import search_vector_store  # type: ignore
+    from utils.anomaly_utils import find_missing_clauses  # type: ignore
 
 # --- Models and Dependencies ---
 

@@ -1,5 +1,6 @@
 const Chat = require("../models/chatModel.js");
 const { v4: uuidv4 } = require("uuid");
+const { callAiChat } = require("./aiController.js");
 
 // POST Chat
 const postChat = async (req, resp) => {
@@ -66,15 +67,26 @@ const postChat = async (req, resp) => {
     // Push user messages
     chat.messages.push(...messages);
 
-    // Bot auto-reply in last message language
-    const lastUserLang = messages.length > 0
-      ? messages[messages.length - 1].language
-      : (language || "en");
+    // Build AI reply using the last user message text (if any)
+    let aiReplyText = "";
+    let aiReplyLang = (language || "en");
+    try {
+      const lastMsg = [...messages].reverse().find(m => (m && m.sender === "user" && typeof m.message === "string"));
+      const lastUserMessage = lastMsg?.message || "";
+      const allowedLangs = ["en", "hi", "pu", "ta"];
+      aiReplyLang = (lastMsg?.language && allowedLangs.includes(lastMsg.language)) ? lastMsg.language : aiReplyLang;
+      if (lastUserMessage.trim().length > 0) {
+        const aiResp = await callAiChat({ query: lastUserMessage, language: aiReplyLang });
+        aiReplyText = aiResp?.translated_response || aiResp?.chatbot_response || "";
+      }
+    } catch (e) {
+      aiReplyText = "Got your message 👍. LegalMitra is here to help!";
+    }
 
     chat.messages.push({
       sender: "bot",
-      message: `Got your message 👍. LegalMitra is here to help! (Language: ${lastUserLang})`,
-      language: lastUserLang,
+      message: aiReplyText || "Got your message 👍. LegalMitra is here to help!",
+      language: aiReplyLang,
       file: null,
     });
 

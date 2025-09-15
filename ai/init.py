@@ -9,8 +9,12 @@ What this does in simple terms:
 import faiss
 import os
 import time
-from .normal_data import CORE_CLAUSES 
-from .utils.embedding_utils import get_embeddings
+try:
+    from .normal_data import CORE_CLAUSES  # package import
+    from .utils.embedding_utils import get_embeddings
+except Exception:
+    from normal_data import CORE_CLAUSES  # local import when run as module from ai/
+    from utils.embedding_utils import get_embeddings
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -32,17 +36,22 @@ async def lifespan(app: FastAPI):
     print("AI Backend starting up...")
     # 1. Generate and store embeddings for the core clauses
     print(f"Generating embeddings for {len(CORE_CLAUSES)} core clauses...")
-    if CORE_CLAUSES:
-        # Get the text of all core clauses
-        core_clause_texts = list(CORE_CLAUSES.values())
-        # Get the embeddings for all of them in a single API call
-        embeddings = get_embeddings(core_clause_texts)
-        # Create a dictionary that maps each clause name to its corresponding embedding
-        app_state["core_embeddings"] = {name: emb for name, emb in zip(CORE_CLAUSES.keys(), embeddings)}
-        print("Core clause embeddings are ready!")
-    else:
+    try:
+        if CORE_CLAUSES:
+            # Get the text of all core clauses
+            core_clause_texts = list(CORE_CLAUSES.values())
+            # Get the embeddings for all of them in a single API call
+            embeddings = get_embeddings(core_clause_texts)
+            # Create a dictionary that maps each clause name to its corresponding embedding
+            app_state["core_embeddings"] = {name: emb for name, emb in zip(CORE_CLAUSES.keys(), embeddings)}
+            print("Core clause embeddings are ready!")
+        else:
+            app_state["core_embeddings"] = {}
+            print("No core clauses found. Skipping core embeddings generation.")
+    except Exception as e:
+        # Start in degraded mode if credentials/APIs are not configured yet
         app_state["core_embeddings"] = {}
-        print("No core clauses found. Skipping core embeddings generation.")
+        print(f"Warning: Failed to generate core embeddings at startup: {e}")
     
     # Record startup time for health checks
     app_state["startup_time"] = time.time()
@@ -97,4 +106,7 @@ def healthz():
 
 # Import API endpoints so they attach to this app instance
 # Place after `app` is defined to avoid circular import issues
-from . import processor_app  # noqa: F401
+try:
+    from . import processor_app  # noqa: F401
+except Exception:
+    import processor_app  # type: ignore  # noqa: F401
