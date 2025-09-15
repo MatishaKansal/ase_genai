@@ -2,34 +2,30 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   header: {
-    // marginTop: 70,
     width: "100%",
     height: 60,
     backgroundColor: "#1f2937",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 15,
-    // elevation: 4,
-    // shadowColor: "#000",
-    // shadowOpacity: 0.2,
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowRadius: 4,
+  },
+  logoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  logo: {
+    marginTop: -5,
+    width: 120,
+    height: 60,
+    marginRight: -10,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: "bold",
-    color: "white",
-  },
-  backButton: {
-    position: "absolute",
-    left: 15,
-  },
-  backText: {
-    fontSize: 20,
-    color: "white",
+    color: "#FFA500",
+    fontFamily: "vintage-regular",
+    fontWeight: "500",
   },
 });
 
 export default styles;
-

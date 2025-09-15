@@ -4,13 +4,15 @@ import {
   KeyboardAvoidingView, Platform, Keyboard,
   TouchableWithoutFeedback, ScrollView, Image, Linking
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import * as DocumentPicker from "expo-document-picker";
 import { useRoute, useFocusEffect } from "@react-navigation/native";
 import styles from "./ChatStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { Audio } from "expo-av";
+
 
 const baseUrl = "http://localhost:5000";
 
@@ -20,6 +22,7 @@ export default function Chat() {
   const [files, setFiles] = useState([]);
   const [messages, setMessages] = useState([]);
   const [notebookId, setNotebookId] = useState(route.params?.notebookId || ""); // initial notebookId
+  const [sound, setSound] = useState(null);
 
   // ✅ Add photo from CameraScreen if exists
   useFocusEffect(
@@ -55,6 +58,7 @@ export default function Chat() {
     } catch (err) {
       console.log("Error fetching chat:", err.message);
       setMessages([]);
+      setNotebookId("");
     }
   }, []);
 
@@ -70,9 +74,10 @@ export default function Chat() {
     }, [route.params?.notebookId, notebookId])
   );
 
-  const handleClear = () => {
+  const handleNewChat = () => {
     setInputValue("");
     setFiles([]);
+    setNotebookId("");
   };
 
   const handleAdd = async () => {
@@ -90,6 +95,21 @@ export default function Chat() {
 
   const removeFile = (index) => setFiles((prev) => prev.filter((_, i) => i !== index));
 
+
+  async function playAudio(url) {
+    try {
+      if (sound) {
+        await sound.unloadAsync(); // pehle ka audio clear
+      }
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: url },
+        { shouldPlay: true }
+      );
+      setSound(newSound);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
+  }
   const handleSend = async () => {
     const user = await AsyncStorage.getItem("user");
     if (!user) return;
@@ -132,8 +152,8 @@ export default function Chat() {
       <View style={styles.container}>
         <Header />
         <View style={styles.topbar}>
-          <TouchableOpacity style={styles.topbarButton} onPress={handleClear}>
-            <Text style={{ color: "black", fontWeight: "500", fontSize: 16 }}>Clear Chat</Text>
+          <TouchableOpacity style={styles.topbarButton} onPress={handleNewChat}>
+            <Text style={{ color: "black", fontWeight: "500", fontSize: 16 }}>New Chat</Text>
           </TouchableOpacity>
         </View>
 
@@ -147,22 +167,47 @@ export default function Chat() {
               {messages.map((msg, index) => (
                 <View
                   key={index}
-                  style={[styles.messageBubble, msg.sender === "user" ? styles.userBubble : styles.botBubble]}
+                  style={[
+                    styles.messageBubble,
+                    msg.sender === "user" ? styles.userBubble : styles.botBubble,
+                  ]}
                 >
-                  {msg.message ? <Text style={styles.messageText}>{msg.message}</Text> : null}
+                  {/* Message text */}
+                  {msg.message ? (
+                    <Text style={styles.messageText}>{msg.message}</Text>
+                  ) : null}
 
+                  {/* File handling */}
                   {msg.file && (
-                    <TouchableOpacity onPress={() => Linking.openURL(msg.file.fileUrl)} style={styles.fileContainer}>
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL(msg.file.fileUrl)}
+                      style={styles.fileContainer}
+                    >
                       {msg.file.fileType.startsWith("image/") ? (
-                        <Image source={{ uri: msg.file.fileUrl }} style={styles.fileImage} resizeMode="cover" />
+                        <Image
+                          source={{ uri: msg.file.fileUrl }}
+                          style={styles.fileImage}
+                          resizeMode="cover"
+                        />
                       ) : (
                         <Text style={styles.fileLink}>{msg.file.fileName}</Text>
                       )}
                     </TouchableOpacity>
                   )}
+
+                  {/* Speaker button only for bot */}
+                  {msg.sender === "bot" && (
+                    <TouchableOpacity
+                      style={styles.speakerButton}
+                      onPress={() => playAudio(msg.audioUrl)}
+                    >
+                      <Ionicons name="volume-high" size={20} color="#1f2937" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               ))}
             </ScrollView>
+
           </View>
 
           <View style={styles.search}>

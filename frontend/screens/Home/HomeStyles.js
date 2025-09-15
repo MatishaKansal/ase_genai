@@ -5,21 +5,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgb(223,223,223)",
   },
-
-  // Navbar
   navbar: {
-    height: 64,
-    backgroundColor: "#151C24",
+    height: 60,
+    backgroundColor: "#1F2937",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 15, // thoda spacing
   },
+
+  logoContainer: {
+    flexDirection: "row",   // logo aur text ek line me
+    alignItems: "center",
+  },
+
   logo: {
-    color: "#f59e0b",
+    width: 120,
+    height: 60,
+    marginRight: 8, // logo aur text ke beech gap
+  },
+
+  headerTitle: {
     fontSize: 30,
-    marginLeft: 20,
-    backgroundColor: "#151C24",
-    textDecorationLine: "none",
+    marginLeft: -10,
+    fontWeight: "bold",
+    color: "#f59e0b", // brand orange
+    fontFamily: "vintage-regular",
   },
   loginButton: {
     backgroundColor: "#f59e0b",
