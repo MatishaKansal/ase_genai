@@ -15,12 +15,13 @@ import {
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import * as DocumentPicker from "expo-document-picker";
-import { useRoute, useFocusEffect } from "@react-navigation/native";
+import { useRoute, useFocusEffect, useNavigation } from "@react-navigation/native";
 import styles from "./ChatStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Audio } from "expo-av";
 import { Picker } from "@react-native-picker/picker";
+
 
 const baseUrl = "http://localhost:5000";
 
@@ -32,6 +33,8 @@ export default function Chat() {
   const [notebookId, setNotebookId] = useState(route.params?.notebookId || "");
   const [sound, setSound] = useState(null);
   const [selectedLang, setSelectedLang] = useState("en");
+  const navigation = useNavigation(); // 👈 add this
+
 
   // Add photo from CameraScreen if exists
   useFocusEffect(
@@ -76,17 +79,21 @@ export default function Chat() {
       if (route.params?.notebookId) {
         setNotebookId(route.params.notebookId);
         fetchChat(route.params.notebookId);
-      } else {
+      } else if (notebookId) {
         fetchChat(notebookId);
+      } else {
+        setMessages([]); // ✅ Start empty for new chat
       }
     }, [route.params?.notebookId, notebookId])
   );
 
-  const handleNewChat = () => {
-    setInputValue("");
-    setFiles([]);
-    setNotebookId("");
-  };
+const handleNewChat = () => {
+  setInputValue("");
+  setFiles([]);
+  setMessages([]);     // clear UI
+  setNotebookId("");   // reset local
+  navigation.setParams({ notebookId: undefined, photo: undefined });
+};
 
   const handleAdd = async () => {
     try {
@@ -117,15 +124,24 @@ export default function Chat() {
     const user = await AsyncStorage.getItem("user");
     if (!user) return;
     const { userId } = JSON.parse(user);
+
+    // ⛔ Prevent sending empty
     if (!inputValue.trim() && files.length === 0) return;
+
+    // ⛔ New chat requires at least one file
+    if (!notebookId && files.length === 0) {
+      alert("Please upload at least one file to start a new chat.");
+      return;
+    }
 
     try {
       const formData = new FormData();
       formData.append("userId", userId);
       formData.append("notebookId", notebookId);
 
-      // ✅ Include selected language per message
-      const messagesToSend = [{ sender: "user", message: inputValue, file: null, language: selectedLang }];
+      const messagesToSend = [
+        { sender: "user", message: inputValue, file: null, language: selectedLang },
+      ];
       formData.append("messages", JSON.stringify(messagesToSend));
 
       files.forEach((file) => {
@@ -148,6 +164,7 @@ export default function Chat() {
       console.log("Error sending chat:", err.message);
     }
   };
+
 
   return (
     <TouchableWithoutFeedback onPress={Platform.OS === "web" ? undefined : Keyboard.dismiss} accessible={false}>
