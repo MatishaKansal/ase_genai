@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 30,
     fontWeight: "bold",
-    color: "#FFA500",
+    color: "#fff",
     fontFamily: "vintage-regular",
     fontWeight: "500",
   },
