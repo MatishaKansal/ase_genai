@@ -70,11 +70,11 @@ const Profile = () => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={{ backgroundColor: "#1f2937" }}>
+      <SafeAreaView style={{ backgroundColor: "#1f2937"}}>
         <View style={styles.top}>
           <View style={styles.profile}>
             <Image
-              source={{ uri: "https://www.w3schools.com/howto/img_avatar.png" }}
+              source={userData.profilePic}
               style={styles.avatar}
             />
             <Text style={styles.profileName}>

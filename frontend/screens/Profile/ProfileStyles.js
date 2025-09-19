@@ -5,7 +5,7 @@ const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f9fafb",
+        backgroundColor: "#c9cdd0ff",
         paddingBottom: 60, // niche tab navigator ke liye jagah
     },
     top: {

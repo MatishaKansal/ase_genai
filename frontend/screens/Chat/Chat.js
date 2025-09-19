@@ -214,7 +214,7 @@ export default function Chat() {
                   style={styles.textarea}
                   value={inputValue}
                   onChangeText={setInputValue}
-                  placeholder="    Upload files and start asking questions..."
+                  placeholder="Upload files and start asking questions..."
                   placeholderTextColor="black"
                   multiline
                   blurOnSubmit={false}
