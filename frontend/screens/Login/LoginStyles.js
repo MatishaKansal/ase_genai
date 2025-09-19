@@ -24,7 +24,7 @@ const LoginStyles = StyleSheet.create({
     marginBottom: 20,
   },
   loginButton: {
-    // backgroundColor: "#4DBF99",
+    // backgroundColor: "#38A169",
     borderWidth: 1,              // thickness of the border
     borderColor: "black",        // color of the border
     borderRadius: 10,  
@@ -88,7 +88,7 @@ const LoginStyles = StyleSheet.create({
     marginBottom: 10,
   },
   signUpButton: {
-    backgroundColor: "#f59e0b",
+    backgroundColor: "#38A169",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -97,7 +97,7 @@ const LoginStyles = StyleSheet.create({
   signUpText: {
     color: "white",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 20,
   },
 });
 

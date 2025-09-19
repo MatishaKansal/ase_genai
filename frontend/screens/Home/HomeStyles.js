@@ -3,11 +3,11 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgb(223,223,223)",
+    backgroundColor: "#F7FAFC",
   },
   navbar: {
-    height: 60,
-    backgroundColor: "#1F2937",
+    height: 70,
+    backgroundColor: "#151C24",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -17,23 +17,25 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: "row",   // logo aur text ek line me
     alignItems: "center",
+    backgroundColor: "#151C24",
   },
 
   logo: {
-    width: 120,
+    width: 120, 
     height: 60,
     marginRight: 8, // logo aur text ke beech gap
+    backgroundColor: "#151C24",
   },
 
   headerTitle: {
     fontSize: 30,
     marginLeft: -10,
     fontWeight: "bold",
-    color: "#f59e0b", // brand orange
+    color: "#ffff", // brand orange
     fontFamily: "vintage-regular",
   },
   loginButton: {
-    backgroundColor: "#f59e0b",
+    backgroundColor: "#3ba46cff",
     height: 50,
     width: 200,
     marginRight: 20,
@@ -42,9 +44,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginText: {
-    color: "white",
+    color: "#fff",
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 
   // Hero section
@@ -53,7 +55,7 @@ const styles = StyleSheet.create({
     marginTop: 70,
     marginLeft: 50,
     marginRight: 50,
-    fontSize: 30,
+    fontSize: 40,
     fontWeight: "bold",
   },
   heroSubtitle: {
@@ -61,7 +63,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginLeft: 50,
     marginRight: 50,
-    fontSize: 20,
+    fontSize: 22,
     color: "#333",
   },
 
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
     width: "90%",
     maxWidth: 400,
     borderRadius: 50,
-    backgroundColor: "white",
+    backgroundColor: "#EDF2F7",
     alignItems: "center",
     padding: 20,
     transitionDuration: "0.3s",
@@ -94,7 +96,8 @@ const styles = StyleSheet.create({
   contentBoxHover: {
     backgroundColor: "#dbd0d0",
     transform: [{ scale: 1.05 }],
-    shadowOpacity: 0.3,
+    shadowOpacity: 1,
+    shadowRadius: 10,
   },
   boxIcon: {
     fontSize: 50,
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   footerButton: {
-    backgroundColor: "#f59e0b",
+    backgroundColor: "#38A169",
     height: 70,
     width: 200,
     borderRadius: 50,

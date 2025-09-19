@@ -4,7 +4,7 @@ import styles from "./HeaderStyles";
 
 export default function Header() {
   return (
-    <SafeAreaView style={{ backgroundColor: "#1f2937" }}>
+    <SafeAreaView style={{ backgroundColor: "#006D77" }}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.logoContainer}>
           <Image
