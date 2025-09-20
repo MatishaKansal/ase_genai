@@ -29,7 +29,7 @@ export default function Chat() {
   const route = useRoute();
   const navigation = useNavigation();
 
-  const [darkMode, setDarkMode] = useState(false); // read from AsyncStorage
+  const [darkMode, setDarkMode] = useState(false); // <-- now synced
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -40,14 +40,16 @@ export default function Chat() {
   const theme = darkMode ? darkTheme : lightTheme;
   const styles = createStyles(theme);
 
-  // Load darkMode from AsyncStorage
-  useEffect(() => {
-    const loadTheme = async () => {
-      const savedTheme = await AsyncStorage.getItem("darkMode");
-      if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
-    };
-    loadTheme();
-  }, []);
+  // Load darkMode from AsyncStorage when screen focuses
+  useFocusEffect(
+    useCallback(() => {
+      const loadTheme = async () => {
+        const savedTheme = await AsyncStorage.getItem("darkMode");
+        if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+      };
+      loadTheme();
+    }, [])
+  );
 
   // Update when a photo is passed from CameraScreen
   useFocusEffect(
@@ -175,7 +177,7 @@ export default function Chat() {
     }
   };
 
-  return (
+   return (
     <TouchableWithoutFeedback onPress={Platform.OS === "web" ? undefined : Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <Header />
@@ -291,3 +293,4 @@ export default function Chat() {
     </TouchableWithoutFeedback>
   );
 }
+
