@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import Chat from "../screens/Chat/Chat";
 import Profile from "../screens/Profile/Profile";  
 import Camera from "../screens/CameraScreen/CameraScreen";         
+import { lightTheme, darkTheme } from "../components/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +20,19 @@ function CameraButton({ children, onPress }) {
 }
 
 export default function TabNavigator() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Load theme from AsyncStorage
+  useEffect(() => {
+    const loadTheme = async () => {
+      const savedTheme = await AsyncStorage.getItem("darkMode");
+      if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+    };
+    loadTheme();
+  }, []);
+
+  const theme = darkMode ? darkTheme : lightTheme;
+
   return (
     <Tab.Navigator
       initialRouteName="Chat"
@@ -25,11 +40,8 @@ export default function TabNavigator() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: { 
-          backgroundColor: "#ffffffff", 
+          backgroundColor: theme.topBar, // ✅ theme-aware background
           height: 80, 
-          // paddingTop: -10,
-          // borderTopColor: "#e5e7eb", 
-          // borderTopWidth: 3,
         },
       }}
     >
@@ -41,8 +53,8 @@ export default function TabNavigator() {
             <Ionicons
               name="person-circle-outline"
               size={40}
-              color={focused ? "#8b5cf6" : "#d2bfff"} // purple active, gray inactive
-              style={{ marginBottom: -10 , marginRight: -10}}
+              color={focused ? theme.primary : theme.inactive} // theme colors
+              style={{ marginBottom: -10 , marginRight: -10 }}
             />
           ),
         }}
@@ -69,8 +81,8 @@ export default function TabNavigator() {
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={40}
-              color={focused ? "#10b981" : "#9de8cf"} // green active, gray inactive
-              style={{ marginBottom: -10 , marginRight: -10}}
+              color={focused ? theme.primary : theme.inactive} // theme-aware
+              style={{ marginBottom: -10 , marginRight: -10 }}
             />
           ),
         }}
@@ -85,13 +97,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-innerCircle: {
-  width: 80, // bigger circle
-  height: 80,
-  borderRadius: 40, // half of width/height
-  backgroundColor: "#6394ff",
-  justifyContent: "center",
-  alignItems: "center",
-  elevation: 5,
-}
+  innerCircle: {
+    width: 80, 
+    height: 80,
+    borderRadius: 40, 
+    backgroundColor: "#00CFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+  }
 });

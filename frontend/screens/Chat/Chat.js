@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -16,27 +16,40 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import Header from "../../components/Header";
 import * as DocumentPicker from "expo-document-picker";
 import { useRoute, useFocusEffect, useNavigation } from "@react-navigation/native";
-import styles from "./ChatStyles";
+import createStyles from "./ChatStyles";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { Audio } from "expo-av";
 import { Picker } from "@react-native-picker/picker";
-
+import { lightTheme, darkTheme } from "../../components/theme";
 
 const baseUrl = "http://localhost:5000";
 
 export default function Chat() {
   const route = useRoute();
+  const navigation = useNavigation();
+
+  const [darkMode, setDarkMode] = useState(false); // read from AsyncStorage
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState([]);
   const [messages, setMessages] = useState([]);
   const [notebookId, setNotebookId] = useState(route.params?.notebookId || "");
   const [sound, setSound] = useState(null);
   const [selectedLang, setSelectedLang] = useState("en");
-  const navigation = useNavigation(); // 👈 add this
 
+  const theme = darkMode ? darkTheme : lightTheme;
+  const styles = createStyles(theme);
 
-  // Add photo from CameraScreen if exists
+  // Load darkMode from AsyncStorage
+  useEffect(() => {
+    const loadTheme = async () => {
+      const savedTheme = await AsyncStorage.getItem("darkMode");
+      if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+    };
+    loadTheme();
+  }, []);
+
+  // Update when a photo is passed from CameraScreen
   useFocusEffect(
     useCallback(() => {
       if (route.params?.photo) {
@@ -82,18 +95,18 @@ export default function Chat() {
       } else if (notebookId) {
         fetchChat(notebookId);
       } else {
-        setMessages([]); // ✅ Start empty for new chat
+        setMessages([]);
       }
     }, [route.params?.notebookId, notebookId])
   );
 
-const handleNewChat = () => {
-  setInputValue("");
-  setFiles([]);
-  setMessages([]);     // clear UI
-  setNotebookId("");   // reset local
-  navigation.setParams({ notebookId: undefined, photo: undefined });
-};
+  const handleNewChat = () => {
+    setInputValue("");
+    setFiles([]);
+    setMessages([]);
+    setNotebookId("");
+    navigation.setParams({ notebookId: undefined, photo: undefined });
+  };
 
   const handleAdd = async () => {
     try {
@@ -125,10 +138,7 @@ const handleNewChat = () => {
     if (!user) return;
     const { userId } = JSON.parse(user);
 
-    // ⛔ Prevent sending empty
     if (!inputValue.trim() && files.length === 0) return;
-
-    // ⛔ New chat requires at least one file
     if (!notebookId && files.length === 0) {
       alert("Please upload at least one file to start a new chat.");
       return;
@@ -165,14 +175,13 @@ const handleNewChat = () => {
     }
   };
 
-
   return (
     <TouchableWithoutFeedback onPress={Platform.OS === "web" ? undefined : Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <Header />
         <View style={styles.topbar}>
           <TouchableOpacity style={styles.topbarButton} onPress={handleNewChat}>
-            <Text style={{ color: "black", fontWeight: "500", fontSize: 16 }}>New Chat</Text>
+            <Text style={{ color: theme.text, fontWeight: "500", fontSize: 16 }}>New Chat</Text>
           </TouchableOpacity>
         </View>
 
@@ -181,21 +190,21 @@ const handleNewChat = () => {
             <ScrollView style={styles.chatArea}>
               {messages.map((msg, index) => (
                 <View key={index} style={[styles.messageBubble, msg.sender === "user" ? styles.userBubble : styles.botBubble]}>
-                  {msg.message && <Text style={styles.messageText}>{msg.message}</Text>}
+                  {msg.message && <Text style={[styles.messageText, { color: theme.text }]}>{msg.message}</Text>}
 
                   {msg.file && (
                     <TouchableOpacity onPress={() => Linking.openURL(msg.file.fileUrl)} style={styles.fileContainer}>
                       {msg.file.fileType.startsWith("image/") ? (
                         <Image source={{ uri: msg.file.fileUrl }} style={styles.fileImage} resizeMode="cover" />
                       ) : (
-                        <Text style={styles.fileLink}>{msg.file.fileName}</Text>
+                        <Text style={[styles.fileLink, { color: theme.text }]}>{msg.file.fileName}</Text>
                       )}
                     </TouchableOpacity>
                   )}
 
                   {msg.sender === "bot" && msg.audioUrl && (
                     <TouchableOpacity style={styles.speakerButton} onPress={() => playAudio(msg.audioUrl)}>
-                      <Ionicons name="volume-high" size={20} color="#1f2937" />
+                      <Ionicons name="volume-high" size={20} color={theme.text} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -212,7 +221,7 @@ const handleNewChat = () => {
                       {file.type?.startsWith("image/") ? (
                         <Image source={{ uri: file.uri }} style={{ width: 60, height: 60, borderRadius: 5 }} />
                       ) : (
-                        <Text numberOfLines={1} style={styles.fileName}>{file.name}</Text>
+                        <Text numberOfLines={1} style={[styles.fileName, { color: theme.text }]}>{file.name}</Text>
                       )}
                       <TouchableOpacity style={styles.removeBtn} onPress={() => removeFile(index)}>
                         <Text style={{ color: "white", fontSize: 12 }}>x</Text>
@@ -224,15 +233,15 @@ const handleNewChat = () => {
 
               <View style={styles.inner}>
                 <TouchableOpacity style={styles.add} onPress={handleAdd}>
-                  <Text style={{ color: "black", fontSize: 24 }}>+</Text>
+                  <Text style={{ color: theme.text, fontSize: 24 }}>+</Text>
                 </TouchableOpacity>
 
                 <TextInput
-                  style={styles.textarea}
+                  style={[styles.textarea, { color: theme.text, borderColor: theme.text }]}
                   value={inputValue}
                   onChangeText={setInputValue}
                   placeholder="Upload files and start asking questions..."
-                  placeholderTextColor="black"
+                  placeholderTextColor={theme.text}
                   multiline
                   blurOnSubmit={false}
                   onKeyPress={({ nativeEvent }) => {
@@ -245,7 +254,7 @@ const handleNewChat = () => {
                 <View style={styles.dropdownWrapper}>
                   <Picker
                     selectedValue={selectedLang}
-                    style={styles.dropdown}
+                    style={[styles.dropdown, { color: theme.text }]}
                     onValueChange={(itemValue) => setSelectedLang(itemValue)}
                   >
                     <Picker.Item label="English" value="en" />
@@ -260,9 +269,9 @@ const handleNewChat = () => {
                   onPress={inputValue || files.length > 0 ? handleSend : () => alert("Mic pressed!")}
                 >
                   {inputValue || files.length > 0 ? (
-                    <FontAwesome name="send" size={22} color="black" />
+                    <FontAwesome name="send" size={22} color={theme.text} />
                   ) : (
-                    <FontAwesome name="microphone" size={24} color="black" />
+                    <FontAwesome name="microphone" size={24} color={theme.text} />
                   )}
                 </TouchableOpacity>
               </View>

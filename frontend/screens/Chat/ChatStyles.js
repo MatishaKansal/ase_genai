@@ -1,8 +1,9 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 
-const { height, width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
-const styles = StyleSheet.create({
+export const createStyles = (theme) =>
+  StyleSheet.create({
   chatArea: {
     flex: 1,
     padding: 10,
@@ -181,4 +182,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
+export default createStyles;
