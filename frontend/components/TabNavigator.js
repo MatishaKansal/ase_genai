@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Chat from "../screens/Chat/Chat";
 import Profile from "../screens/Profile/Profile";  
 import Camera from "../screens/CameraScreen/CameraScreen";         
-import { lightTheme, darkTheme } from "../components/theme";
+import { lightTheme, darkTheme } from "./theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createBottomTabNavigator();
@@ -22,6 +22,10 @@ function CameraButton({ children, onPress }) {
 export default function TabNavigator() {
   const [darkMode, setDarkMode] = useState(false);
 
+  const theme = darkMode ? darkTheme : lightTheme;
+
+  
+
   // Load theme from AsyncStorage
   useEffect(() => {
     const loadTheme = async () => {
@@ -31,7 +35,11 @@ export default function TabNavigator() {
     loadTheme();
   }, []);
 
-  const theme = darkMode ? darkTheme : lightTheme;
+  // Save theme changes to AsyncStorage
+  useEffect(() => {
+    AsyncStorage.setItem("darkMode", JSON.stringify(darkMode));
+  }, [darkMode]);
+  
 
   return (
     <Tab.Navigator

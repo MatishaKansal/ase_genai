@@ -171,6 +171,17 @@ export default function Chat() {
         formData.append("files", { uri, name: file.name || `upload-${Date.now()}`, type: file.type || "application/octet-stream" });
         console.log("Appended file:", uri, file.name, file.type);
       }
+    console.log("--- Contents of FormData ---");
+    for (const pair of formData.entries()) {
+      const [name, value] = pair;
+
+      if (value instanceof Blob) {
+        console.log(`${name}: [File] - Name: ${value.name}, Type: ${value.type}, Size: ${value.size} bytes`);
+      } else {
+        console.log(`${name}: ${value}`);
+      }
+    }
+    console.log("--- End of FormData ---");
       const res = await axios.post(`${baseUrl}/api/chat/${userId}`, formData, { headers: { Accept: "application/json" } });
 
       if (!notebookId) setNotebookId(res.data.notebookId);

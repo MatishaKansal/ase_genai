@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 60,
     marginRight: -10,
+    borderRadius: 18,
   },
   headerTitle: {
     fontSize: 30,

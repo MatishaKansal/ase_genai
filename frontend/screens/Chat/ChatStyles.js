@@ -31,10 +31,12 @@ export const createStyles = (theme) =>
     padding: 10,
     borderRadius: 10,
     maxWidth: "80%",
+    minWidth: 50,
   },
   userBubble: {
     alignSelf: "flex-end",
     backgroundColor: theme.userBubble, 
+    
   },
   botBubble: {
     alignSelf: "flex-start",
