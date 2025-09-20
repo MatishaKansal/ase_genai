@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7FAFC",
+    backgroundColor: "#010419",
   }, 
   navbar: {
     height: 70,
@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     fontFamily: "vintage-regular",
   },
   loginButton: {
-    backgroundColor: "#3ba46cff",
+    backgroundColor: "#00CFFF",
     height: 50,
     width: 200,
     marginRight: 20,
@@ -56,7 +56,11 @@ const styles = StyleSheet.create({
     marginLeft: 50,
     marginRight: 50,
     fontSize: 40,
+    Color: 'white',
     fontWeight: "bold",
+    textShadowColor: 'rgba(0, 255, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 30,
   },
   heroSubtitle: {
     marginTop: 30,
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
     marginLeft: 50,
     marginRight: 50,
     fontSize: 22,
-    color: "#333",
+    color: "#00CFFF",
   },
 
   // Content
@@ -72,7 +76,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
     minHeight: 700,
     width: "100%",
-    backgroundColor: "rgb(236,234,234)",
+    backgroundColor: "#010419",
     flexDirection: "row",
     justifyContent: "space-around",
     flexWrap: "wrap",
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
     width: "90%",
     maxWidth: 400,
     borderRadius: 50,
-    backgroundColor: "#EDF2F7",
+    backgroundColor: "#0B1E33",
     alignItems: "center",
     padding: 20,
     transitionDuration: "0.3s",
@@ -94,10 +98,12 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   contentBoxHover: {
-    backgroundColor: "#dbd0d0",
+    backgroundColor: "#76a1b4ff",
     transform: [{ scale: 1.05 }],
-    shadowOpacity: 1,
-    shadowRadius: 10,
+    shadowColor: '#00CFFF',
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
   },
   boxIcon: {
     fontSize: 50,
@@ -108,6 +114,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 50,
     textAlign: "center",
+    color:"#fff",
   },
   boxText: {
     fontSize: 16,
@@ -115,6 +122,7 @@ const styles = StyleSheet.create({
     marginTop: 30,
     textAlign: "center",
     width: "90%",
+    color:"#fff",
   },
 
   // Footer
@@ -129,6 +137,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "white",
     marginBottom: 20,
+    textShadowColor: 'rgba(0, 255, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
   },
   footerSubtitle: {
     fontSize: 18,
@@ -137,9 +148,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginLeft: 15,
     marginRight: 15,
+    textShadowColor: 'rgba(0, 255, 255, 0.8)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   footerButton: {
-    backgroundColor: "#38A169",
+    backgroundColor: "#00CFFF",
     height: 70,
     width: 200,
     borderRadius: 50,
