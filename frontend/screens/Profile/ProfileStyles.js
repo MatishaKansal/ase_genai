@@ -144,7 +144,7 @@ export const createStyles = (theme) =>
         ...Platform.select({
             web: {
                 transform: [{ scale: 1.05 }],
-                shadowColor: "#6b7280",
+                shadowColor: theme.shadowbackground,
                 shadowOpacity: 0.4,
                 shadowOffset: { width: 0, height: 8 },
                 shadowRadius: 20,

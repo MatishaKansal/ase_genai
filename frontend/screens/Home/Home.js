@@ -39,7 +39,7 @@ export default function Home() {
       text: "Your documents and their scores are saved securely. Track your history and access past insights whenever you need them.",
     },
   ];
-
+ 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>

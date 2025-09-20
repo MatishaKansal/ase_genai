@@ -7,7 +7,8 @@ export const lightTheme = {
   primary: "#2563EB",
   inactive: "#A1A1AA",
   heading: "#f59e0b",
-  headingbackground : "#fff"
+  headingbackground : "#fff",
+  shadowbackground: '#6b7280',
 };
 
 export const darkTheme = {
@@ -21,4 +22,5 @@ export const darkTheme = {
   inactive: "#00CFFF",
   heading: '#00CFFF',
   headingbackground: 'rgba(0, 255, 255, 0.8)',
+  shadowbackground: '#00CFFF',
 };

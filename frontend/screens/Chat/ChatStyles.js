@@ -4,6 +4,11 @@ const { width, height } = Dimensions.get("window");
 
 export const createStyles = (theme) =>
   StyleSheet.create({
+  container: {
+      flex: 1,
+      backgroundColor: '#490606ff',
+      paddingBottom: 60, // niche tab navigator ke liye jagah
+    }, 
   chatArea: {
     flex: 1,
     padding: 10,
@@ -11,6 +16,16 @@ export const createStyles = (theme) =>
     alignSelf: "center",
     backgroundColor: "transparent",
   },
+  mode_container: {
+        // borderWidth: 2,
+        // borderColor: "#F59E0B",
+        // alignContent: "right",
+        position: "absolute",
+        marginLeft: 1100,
+        zIndex: 200,
+        marginLeft: 1450,
+        marginTop: 12,
+    },
   messageBubble: {
     marginVertical: 5,
     padding: 10,

@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F7FAFC",
-  },
+  }, 
   navbar: {
     height: 70,
     backgroundColor: "#151C24",

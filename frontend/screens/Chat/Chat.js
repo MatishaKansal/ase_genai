@@ -184,6 +184,15 @@ export default function Chat() {
             <Text style={{ color: theme.text, fontWeight: "500", fontSize: 16 }}>New Chat</Text>
           </TouchableOpacity>
         </View>
+        <View style={styles.mode_container}>
+                    <TouchableOpacity onPress={() => setDarkMode(!darkMode)}>
+                      <Ionicons
+                        name={darkMode ? "sunny" : "moon"}
+                        size={32}
+                        color={darkMode ? "#BEBEBE" : "#fff"}
+                      />
+                    </TouchableOpacity>
+                  </View>
 
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={10}>
           <View style={styles.content}>
