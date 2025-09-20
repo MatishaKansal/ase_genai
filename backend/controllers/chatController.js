@@ -5,6 +5,11 @@ const { callAiChat } = require("./aiController.js");
 // POST Chat
 const postChat = async (req, resp) => {
   try {
+    console.log("POST /api/chat incoming");
+    console.log("req.body keys:", Object.keys(req.body));
+    console.log("req.body.messages:", req.body.messages);
+    console.log("req.files:", req.files && req.files.length ? req.files.map(f => ({ originalname: f.originalname, path: f.path })) : req.files);
+
     const { userId } = req.params;
     let { notebookId, messages, language } = req.body;
 
@@ -49,24 +54,33 @@ const postChat = async (req, resp) => {
     // }
 
         // Handle uploaded files (via Cloudinary)
-    if (req.files && req.files.length > 0) {
-      const fileObjects = req.files.map((file) => ({
-        fileName: file.originalname,
-        fileType: file.mimetype,
-        fileUrl: file.path, // Cloudinary gives full secure URL
-      }));
+      if (req.files && req.files.length > 0) {
+        console.log("✅ Files received in controller:", req.files.map(f => ({
+          name: f.originalname,
+          url: f.path,
+          publicId: f.public_id,
+        })));
 
-      if (messages.length > 0) {
-        messages[messages.length - 1].files = fileObjects;
+        const fileObjects = req.files.map((file) => ({
+          fileName: file.originalname,
+          fileType: file.mimetype,
+          fileUrl: file.path,  // Cloudinary secure_url
+          publicId: file.public_id || null,
+        }));
+
+        if (messages.length > 0) {
+          messages[messages.length - 1].files = fileObjects;
+        } else {
+          messages.push({
+            sender: "user",
+            message: "",
+            language: language || "en",
+            files: fileObjects,
+          });
+        }
       } else {
-        messages.push({
-          sender: "user",
-          message: "",
-          language: language || "en",
-          files: fileObjects,
-        });
+        console.log("ℹ️ No files found in req.files inside chatController.");
       }
-    }
 
     // Ensure each message has sender and language
     messages = messages.map((msg) => ({

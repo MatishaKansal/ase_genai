@@ -1,21 +1,28 @@
+// cloudinary.js
 const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const multer = require("multer");
+const path = require("path");
+const dotenv = require("dotenv");
 
+// Load .env file from project root
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+// Destructure environment variables
+const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+
+// Check if any required env variable is missing
+if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+  throw new Error(
+    "❌ Cloudinary environment variables missing. Please check your .env file."
+  );
+}
+
+// Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: CLOUDINARY_CLOUD_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "uploads",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-  },
-});
+console.log("✅ Cloudinary configured with cloud name:", CLOUDINARY_CLOUD_NAME);
 
-const upload = multer({ storage });
-
-module.exports = { cloudinary, upload };
+module.exports = cloudinary;
