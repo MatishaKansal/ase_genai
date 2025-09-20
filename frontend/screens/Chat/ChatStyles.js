@@ -34,11 +34,11 @@ export const createStyles = (theme) =>
   },
   userBubble: {
     alignSelf: "flex-end",
-    backgroundColor: "#cfe1fc",
+    backgroundColor: theme.userBubble, 
   },
   botBubble: {
     alignSelf: "flex-start",
-    backgroundColor: "#EAEAEA",
+    backgroundColor: theme.botBubble,
   },
   messageText: {
     fontSize: 16,
