@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, SafeAreaView, Image } from "react-native";
 import styles from "./HeaderStyles";
 
+
 export default function Header() {
   return (
     <SafeAreaView style={{ backgroundColor: "#006D77" }}>

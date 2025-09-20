@@ -71,7 +71,7 @@ export const createStyles = (theme) =>
   topbar: {
     width: "100%",
     height: 64,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: theme.background,
     justifyContent: "center",
     alignItems: "flex-end",
     paddingRight: 10,
