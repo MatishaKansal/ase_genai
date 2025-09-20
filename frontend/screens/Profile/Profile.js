@@ -12,21 +12,37 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import styles from "./ProfileStyles";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import axios from "axios";
+import { lightTheme, darkTheme } from "../../components/theme";
+import { createStyles } from "./ProfileStyles";
 
 const baseUrl = "http://localhost:5000";
-
 const { height, width } = Dimensions.get("window");
 
 const Profile = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [info, setInfo] = useState([]);
   const [userData, setUserData] = useState({});
   const [hoverIndex, setHoverIndex] = useState(null);
 
+  const theme = darkMode ? darkTheme : lightTheme;
+  const styles = createStyles(theme);
   const navigation = useNavigation();
+
+  // Load saved theme from AsyncStorage
+  useEffect(() => {
+    const loadTheme = async () => {
+      const savedTheme = await AsyncStorage.getItem("darkMode");
+      if (savedTheme !== null) setDarkMode(JSON.parse(savedTheme));
+    };
+    loadTheme();
+  }, []);
+
+  // Save theme changes to AsyncStorage
+  useEffect(() => {
+    AsyncStorage.setItem("darkMode", JSON.stringify(darkMode));
+  }, [darkMode]);
 
   const fetchData = async () => {
     try {
@@ -37,17 +53,14 @@ const Profile = () => {
       setUserData(parsedUser);
 
       const { userId } = parsedUser;
-
       const res = await axios.get(`${baseUrl}/api/chat/${userId}`);
-
-      console.log("Notebooks data:", res.data);
       setInfo(res.data);
     } catch (err) {
       console.log("Error fetching notebooks:", err.message);
     }
   };
 
-  // ✅ useFocusEffect se har tab change pe refresh hoga
+  // Refresh data when screen focuses
   useFocusEffect(
     useCallback(() => {
       fetchData();
@@ -57,8 +70,6 @@ const Profile = () => {
   const handleLogout = async () => {
     try {
       await AsyncStorage.clear();
-      console.log("Logged out successfully");
-
       navigation.reset({
         index: 0,
         routes: [{ name: "Home" }],
@@ -70,21 +81,36 @@ const Profile = () => {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={{ backgroundColor: "#1f2937"}}>
+      <SafeAreaView style={{ backgroundColor: theme.topbar }}>
         <View style={styles.top}>
           <View style={styles.profile}>
-            <Image
-              source={userData.profilePic}
-              style={styles.avatar}
-            />
+            <Image source={userData.profilePic} style={styles.avatar} />
             <Text style={styles.profileName}>
               Welcome {userData.userName || "GEN AI"} !!
             </Text>
           </View>
 
+          {/* Dark/Light Mode Toggle */}
+          <View style={styles.mode_container}>
+            <TouchableOpacity onPress={() => setDarkMode(!darkMode)}>
+              <Ionicons
+                name={darkMode ? "sunny" : "moon"}
+                size={32}
+                color={darkMode ? "#BEBEBE" : "#fff"}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Logout Button */}
           <View style={styles.settings_container}>
             <TouchableOpacity onPress={handleLogout}>
-              <Text style={{ color: "#F59E0B", fontSize: 20, fontWeight: "700" }}>
+              <Text
+                style={{
+                  color: "#00CFFF",
+                  fontSize: 20,
+                  fontWeight: "700",
+                }}
+              >
                 Logout
               </Text>
             </TouchableOpacity>
@@ -97,7 +123,7 @@ const Profile = () => {
         <Text style={styles.historyHeading}>HISTORY</Text>
 
         {info.length === 0 ? (
-          <Text style={styles.null_message}>No History Available.....</Text>
+          <Text style={{ color: theme.text }}>No History Available...</Text>
         ) : (
           <FlatList
             data={info}
@@ -117,8 +143,7 @@ const Profile = () => {
                     hoverIndex === index &&
                     styles.historyCardHovered,
                 ]}
-                onPress={() => 
-                  // console.log(item.notebookId)
+                onPress={() =>
                   navigation.navigate("Chat", { notebookId: item.notebookId })
                 }
                 onMouseEnter={() =>
@@ -129,10 +154,7 @@ const Profile = () => {
                 }
               >
                 <LinearGradient
-                  colors={[
-                    "rgba(31, 41, 55, 0.6)",
-                    "rgba(55, 65, 81, 0.4)",
-                  ]}
+                  colors={[theme.cardTop, theme.cardTop + "80"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={styles.historyCardTop}

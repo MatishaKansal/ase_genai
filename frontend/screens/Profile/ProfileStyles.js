@@ -2,23 +2,24 @@ import { StyleSheet, Dimensions, Platform } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-const styles = StyleSheet.create({
+export const createStyles = (theme) =>
+  StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: "#F2F2F2",
-        paddingBottom: 60, // niche tab navigator ke liye jagah
-    },
+      flex: 1,
+      backgroundColor: theme.background,
+      paddingBottom: 60, // niche tab navigator ke liye jagah
+    },  
     top: {
         width: "100%",
         paddingHorizontal: 20,
         paddingVertical: 5,
         borderBottomWidth: 2,
-        borderBottomColor: "#ddd",
+        // borderBottomColor: "#ddd",
         height: 60,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: "#1f2937",
+        backgroundColor: "#3b3b3bff",
         // borderWidth: 2,
         // borderColor: "white",
     },
@@ -40,9 +41,17 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: "white",
     },
+    mode_container: {
+        // borderWidth: 2,
+        // borderColor: "#F59E0B",
+        // alignContent: "right",
+        position: "relative",
+        marginLeft: 1100,
+        zIndex: 200,
+    },
     settings_container: {
-    position: "relative",
-    zIndex: 300,
+        position: "relative",
+        zIndex: 300,
     },
     dropdown: {
     position: "absolute",
@@ -81,7 +90,13 @@ const styles = StyleSheet.create({
     historyHeading: {
         fontSize: 48,
         fontWeight: "bold",
-        color: "#f59e0b",
+        color: theme.heading,
+        fontSize: 40,
+        fontWeight: 'bold',
+        // color: 'white',
+        textShadowColor: theme.headingbackground,
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 10,
     },
     scrollContainer: {
         flex: 1,
@@ -106,8 +121,9 @@ const styles = StyleSheet.create({
     historyCard: {
         width: Platform.OS === "web" ? "30%" : "45%", // web: 3 cards per row, mobile: 2 per row
         width: 200,
+        color:"#CFCFCF",
         height: 200,
-        backgroundColor: "white",
+        backgroundColor: theme.cardBackground,
         borderRadius: 10,
         padding: 10,
         shadowColor: "#000",
@@ -138,8 +154,10 @@ const styles = StyleSheet.create({
     },
     historyCardTop: {
         height: height * 0.06,
-        backgroundColor: "rgba(31, 41, 55, 0.7)",
+        backgroundColor: theme.cardTop,
         borderRadius: 10,
+        color: "#CFCFCF",
+        alignItems: "center" ,
         justifyContent: "center",
         paddingHorizontal: 5,
         overflow: "hidden",
@@ -147,13 +165,13 @@ const styles = StyleSheet.create({
     cardTitle: {
         color: "white",
         fontWeight: "bold",
-        fontSize: 16,
+        fontSize: 22,
         overflow: "hidden",
     },
     historyCardBottom: {
         flex: 1,
         padding: 10,
-        color: "#1f2937",
+        color: theme.text,
         opacity: 0.8,
         overflow: "hidden",
     },
@@ -166,4 +184,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default styles;
+export default createStyles;
