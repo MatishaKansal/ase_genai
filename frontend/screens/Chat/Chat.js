@@ -178,6 +178,7 @@ export default function Chat() {
   };
 
    return (
+    <View style={{flex: 1, backgroundColor: theme.background}}>
     <TouchableWithoutFeedback onPress={Platform.OS === "web" ? undefined : Keyboard.dismiss} accessible={false}>
       <View style={styles.container}>
         <Header />
@@ -291,6 +292,7 @@ export default function Chat() {
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
+    </View>
   );
 }
 
