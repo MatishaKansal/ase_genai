@@ -1,5 +1,5 @@
 const express = require("express");
-const upload = require("../middleware/upload");
+const { upload } = require("../middleware/cloudinary"); // <-- updated
 const { postChat, getChat, getAllNotebooks } = require("../controllers/chatController.js");
 const { processDocument } = require("../controllers/aiController.js");
 
@@ -11,7 +11,7 @@ router.get("/chat/:userId/:notebookId", getChat);
 
 router.get("/chat/:userId", getAllNotebooks);
 
-// Proxy route to AI service for document processing (uses memory storage)
+// Proxy route for AI document processing
 const multer = require("multer");
 const memoryUpload = multer({ storage: multer.memoryStorage() });
 router.post("/process-document", memoryUpload.single("file"), processDocument);

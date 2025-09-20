@@ -31,21 +31,41 @@ const postChat = async (req, resp) => {
     if (!notebookId) notebookId = uuidv4();
 
     // Attach uploaded files
+    // if (req.files && req.files.length > 0) {
+    //   req.files.forEach((file, index) => {
+    //     if (messages[index]) {
+    //       messages[index].file = {
+    //         fileName: file.originalname,
+    //         fileType: file.mimetype,
+    //         fileUrl: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
+    //       };
+    //       if (!messages[index].message) messages[index].message = "";
+    //     }
+    //   });
+    // } else {
+    //   messages.forEach((msg) => {
+    //     if (!msg.file) msg.file = null;
+    //   });
+    // }
+
+        // Handle uploaded files (via Cloudinary)
     if (req.files && req.files.length > 0) {
-      req.files.forEach((file, index) => {
-        if (messages[index]) {
-          messages[index].file = {
-            fileName: file.originalname,
-            fileType: file.mimetype,
-            fileUrl: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
-          };
-          if (!messages[index].message) messages[index].message = "";
-        }
-      });
-    } else {
-      messages.forEach((msg) => {
-        if (!msg.file) msg.file = null;
-      });
+      const fileObjects = req.files.map((file) => ({
+        fileName: file.originalname,
+        fileType: file.mimetype,
+        fileUrl: file.path, // Cloudinary gives full secure URL
+      }));
+
+      if (messages.length > 0) {
+        messages[messages.length - 1].files = fileObjects;
+      } else {
+        messages.push({
+          sender: "user",
+          message: "",
+          language: language || "en",
+          files: fileObjects,
+        });
+      }
     }
 
     // Ensure each message has sender and language
@@ -87,7 +107,7 @@ const postChat = async (req, resp) => {
       sender: "bot",
       message: aiReplyText || "Got your message 👍. LegalMitra is here to help!",
       language: aiReplyLang,
-      file: null,
+      file: [],
     });
 
     await chat.save();
