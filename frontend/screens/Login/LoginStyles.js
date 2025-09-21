@@ -4,7 +4,7 @@ const LoginStyles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#7c7a7aff",
     justifyContent: "center", 
     alignItems: "center", 
     
@@ -43,9 +43,9 @@ const LoginStyles = StyleSheet.create({
   },
   box: {
     flex: 1,
-    backgroundColor: "white",
     justifyContent: "center",
     padding: 20,
+    backgroundColor: "white",
     // borderTopLeftRadius: 20,
     borderRadius: 20,
     shadowColor: "#000",
@@ -88,7 +88,7 @@ const LoginStyles = StyleSheet.create({
     marginBottom: 10,
   },
   signUpButton: {
-    backgroundColor: "#38A169",
+    backgroundColor: "#00CFFF",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",

@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#010419",
+    backgroundColor: "#282828ff",
   }, 
   navbar: {
     height: 70,
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     marginLeft: 50,
     marginRight: 50,
     fontSize: 40,
-    Color: 'white',
+    color: 'white',
     fontWeight: "bold",
     textShadowColor: 'rgba(0, 255, 255, 0.8)',
     textShadowOffset: { width: 0, height: 0 },
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     marginTop: 100,
     minHeight: 700,
     width: "100%",
-    backgroundColor: "#010419",
+    backgroundColor: "#282828ff",
     flexDirection: "row",
     justifyContent: "space-around",
     flexWrap: "wrap",

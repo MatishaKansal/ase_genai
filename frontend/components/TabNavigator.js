@@ -48,9 +48,10 @@ export default function TabNavigator() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: { 
-          backgroundColor: theme.topBar, // ✅ theme-aware background
+          backgroundColor: "#3B3B3B", // ✅ theme-aware background
           height: 80, 
-        },
+          borderTopWidth: 0, // no border
+          },
       }}
     >
       <Tab.Screen
@@ -61,7 +62,7 @@ export default function TabNavigator() {
             <Ionicons
               name="person-circle-outline"
               size={40}
-              color={focused ? theme.primary : theme.inactive} // theme colors
+              color={focused ? "#2563EB" : "#00CFFF"} // theme colors
               style={{ marginBottom: -10 , marginRight: -10 }}
             />
           ),
@@ -89,7 +90,7 @@ export default function TabNavigator() {
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={40}
-              color={focused ? theme.primary : theme.inactive} // theme-aware
+              color={focused ? "#2563EB" : "#00CFFF"} // theme-aware
               style={{ marginBottom: -10 , marginRight: -10 }}
             />
           ),
