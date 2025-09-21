@@ -1,0 +1,36 @@
+# Copy this file to .env and fill in your actual values
+
+# Google Cloud Configuration
+GCP_PROJECT_ID=your-gcp-project-id
+GCP_LOCATION=us-central1
+DOCAI_LOCATION=us
+DOCAI_PROCESSOR_ID=your-docai-processor-id
+GCS_BUCKET_NAME=your-bucket-name
+
+# ADC credentials
+# Absolute path to your service account JSON key (or rely on Workload Identity/ADC in environment)
+GOOGLE_APPLICATION_CREDENTIALS=C:\\path\\to\\service_account.json
+
+# Vertex AI
+EMBEDDING_MODEL=text-embedding-004
+
+# Application settings
+CHUNK_SIZE=200
+ANOMALY_THRESHOLD=0.65
+
+# Generator tuning (optional)
+# CLUSTERING_THRESHOLD=0.50
+# MIN_CLUSTER_SIZE=5
+# COVERAGE_THRESHOLD=0.65
+# TARGET_MIN=10
+# TARGET_MAX=15
+
+# UX
+DISCLAIMER_TEXT=The information provided is for informational purposes only. All responses are AI-generated and may be inaccurate.
+
+# Optional: Prompt customization (use \n for new lines). Placeholders required:
+#  - {context}  -> joined document chunks
+#  - {question} -> (Q&A only) user's question
+# SUMMARY_PROMPT_TEMPLATE=You are a meticulous legal analyst tasked with demystifying a rental agreement. Work ONLY with the provided document excerpts. Do not invent facts or rely on outside knowledge.\n\nGoals:\n- Produce a clear, plain-language summary suitable for a non-lawyer.\n- Extract concrete facts (names, dates, amounts, addresses) exactly as written.\n- Highlight obligations of each party, fees/penalties, and key risks.\n- Note any sections that are not specified in the excerpts.\n\nOutput format (use short bullets, keep it crisp):\n- Title: Plain-language Summary\n- Parties & Property: ...\n- Financial Terms (amounts, frequency, due dates, deposits): ...\n- Term & Termination (start/end, notice, renewal): ...\n- Obligations (landlord vs tenant): ...\n- Restrictions/Usage rules: ...\n- Maintenance/Repairs: ...\n- Penalties/Liability/Indemnity: ...\n- Notices & Jurisdiction: ...\n- Other Material Terms: ...\n- Unknown/Not specified: bullet list of important items that are missing from the excerpts.\n\nGuidelines:\n- Quote numbers/dates/amounts exactly as they appear.\n- If a field is missing in the excerpts, write: Not specified in excerpts.\n\nDocument Excerpts:\n{context}
+# QA_PROMPT_TEMPLATE=You are an expert legal assistant. Answer the user's question strictly and ONLY from the provided document excerpts. If the answer is not present in the text, reply exactly: "I cannot answer this question based on the document."\n\nInstructions:\n- Be concise and precise; quote exact amounts/dates/names when relevant.\n- If only partial information is available, state what is known and note what is not specified in the excerpts.\n- Do not speculate or use outside knowledge.\n\nUser question: {question}\n\nDocument excerpts:\n{context}
+
