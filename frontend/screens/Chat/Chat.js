@@ -182,7 +182,11 @@ export default function Chat() {
       }
     }
     console.log("--- End of FormData ---");
-      const res = await axios.post(`${baseUrl}/api/chat/${userId}`, formData, { headers: { Accept: "application/json" } });
+      const res = await axios.post(`${baseUrl}/api/chat/${userId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (!notebookId) setNotebookId(res.data.notebookId);
       setMessages(Array.isArray(res.data.messages) ? res.data.messages : []);
