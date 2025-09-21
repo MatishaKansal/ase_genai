@@ -5,123 +5,61 @@ const { callAiChat } = require("./aiController.js");
 // POST Chat
 const postChat = async (req, resp) => {
   try {
-    console.log("POST /api/chat incoming");
-    console.log("req.body keys:", Object.keys(req.body));
-    console.log("req.body.messages:", req.body.messages);
-    console.log("req.files:", req.files && req.files.length ? req.files.map(f => ({ originalname: f.originalname, path: f.path })) : req.files);
-
     const { userId } = req.params;
     let { notebookId, messages, language } = req.body;
-
-    const allowedLangs = ["en", "hi", "pu", "ta"];
-
-    // Validate request-level language
-    if (language && !allowedLangs.includes(language)) {
-      return resp.status(400).json({ error: "Invalid language" });
+    console.log("notebookId", notebookId);
+    console.log("messages", messages);
+    console.log("language", language);
+    console.log("req.files", req.files);
+    if (!language) {
+      language = "en";
     }
 
-    // Parse messages if sent as string
-    if (typeof messages === "string") {
-      try {
-        messages = JSON.parse(messages);
-      } catch (e) {
-        return resp.status(400).json({ error: "Invalid messages format" });
-      }
+    if (messages && typeof messages === "string") {
+      messages = JSON.parse(messages);
     }
 
-    // Ensure messages is an array
-    if (!Array.isArray(messages)) messages = [];
-
-    // Generate notebookId if new chat
-    if (!notebookId) notebookId = uuidv4();
-
-    // Attach uploaded files
-    // if (req.files && req.files.length > 0) {
-    //   req.files.forEach((file, index) => {
-    //     if (messages[index]) {
-    //       messages[index].file = {
-    //         fileName: file.originalname,
-    //         fileType: file.mimetype,
-    //         fileUrl: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
-    //       };
-    //       if (!messages[index].message) messages[index].message = "";
-    //     }
-    //   });
-    // } else {
-    //   messages.forEach((msg) => {
-    //     if (!msg.file) msg.file = null;
-    //   });
-    // }
-
-        // Handle uploaded files (via Cloudinary)
-      if (req.files && req.files.length > 0) {
-        console.log("✅ Files received in controller:", req.files.map(f => ({
-          name: f.originalname,
-          url: f.path,
-          publicId: f.public_id,
-        })));
-
-        const fileObjects = req.files.map((file) => ({
-          fileName: file.originalname,
-          fileType: file.mimetype,
-          fileUrl: file.path,  // Cloudinary secure_url
-          publicId: file.public_id || null,
-        }));
-
-        if (messages.length > 0) {
-          messages[messages.length - 1].files = fileObjects;
-        } else {
-          messages.push({
-            sender: "user",
-            message: "",
-            language: language || "en",
-            files: fileObjects,
-          });
-        }
-      } else {
-        console.log("ℹ️ No files found in req.files inside chatController.");
-      }
-
-    // Ensure each message has sender and language
-    messages = messages.map((msg) => ({
-      sender: msg.sender || "user",
-      message: msg.message || "",
-      language: msg.language && allowedLangs.includes(msg.language)
-        ? msg.language
-        : (language || "en"),
-      file: msg.file || null,
-    }));
-
-    // Find or create chat
+    if (!notebookId) {
+      notebookId = uuidv4();
+    }
     let chat = await Chat.findOne({ userId, notebookId });
+
     if (!chat) {
-      chat = new Chat({ userId, notebookId, messages: [] });
+      chat = new Chat({
+        userId,
+        notebookId,
+        messages: [],
+      });
     }
 
-    // Push user messages
-    chat.messages.push(...messages);
+    if (req.files && req.files.length > 0) {
+      console.log("req.files", req.files);
+      const fileObjects = req.files.map((file) => ({
+        fileName: file.originalname,
+        fileType: file.mimetype,
+        fileUrl: file.path,
+        publicId: file.public_id,
+      }));
 
-    // Build AI reply using the last user message text (if any)
-    let aiReplyText = "";
-    let aiReplyLang = (language || "en");
-    try {
-      const lastMsg = [...messages].reverse().find(m => (m && m.sender === "user" && typeof m.message === "string"));
-      const lastUserMessage = lastMsg?.message || "";
-      const allowedLangs = ["en", "hi", "pu", "ta"];
-      aiReplyLang = (lastMsg?.language && allowedLangs.includes(lastMsg.language)) ? lastMsg.language : aiReplyLang;
-      if (lastUserMessage.trim().length > 0) {
-        const aiResp = await callAiChat({ query: lastUserMessage, language: aiReplyLang });
-        aiReplyText = aiResp?.translated_response || aiResp?.chatbot_response || "";
-      }
-    } catch (e) {
-      aiReplyText = "Got your message 👍. LegalMitra is here to help!";
+      const userMessageWithFiles = {
+        sender: "user",
+        message: messages[0]?.message || "",
+        language: language,
+        files: fileObjects,
+      };
+      chat.messages.push(userMessageWithFiles);
+    } else if (messages && messages.length > 0) {
+      chat.messages.push(...messages);
     }
-
+    const aiReply = await callAiChat(
+      messages[0].message,
+      language,
+      req.files
+    );
     chat.messages.push({
-      sender: "bot",
-      message: aiReplyText || "Got your message 👍. LegalMitra is here to help!",
-      language: aiReplyLang,
-      file: [],
+      sender: "ai",
+      message: aiReply,
+      language: language,
     });
 
     await chat.save();
