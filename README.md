@@ -1,8 +1,8 @@
 
 
-# LegalMitra – Demystifying Legal Documents
+# The Legal Compass – Your Own Personal Legal Assistant
 
-LegalMitra is a **cross-platform Web + Android application** built using **React, React Native (Expo)**, and **Google Cloud's Generative AI services**. It simplifies complex legal documents into clear, multilingual summaries with **voice output, clause-level risk detection, and a context-aware Q&A chatbot**.
+Legal Compass is a **cross-platform Web + Android application** built using **React, React Native (Expo)**, and **Google Cloud's Generative AI services**. It simplifies complex legal documents into clear, multilingual summaries with **voice output, clause-level risk detection, and a context-aware Q&A chatbot**.
 
 ---
 
